@@ -95,6 +95,46 @@ const noOverflow = async (page: Page) => {
   }))
   expect(check.ok, JSON.stringify(check.offenders)).toBe(true)
 }
+test("CSV export waits for the applied filter navigation", async ({ page }) => {
+  await page.goto("/reports")
+  await expect(
+    page.getByRole("heading", { name: "Laporan", exact: true })
+  ).toBeVisible()
+  let release!: () => void
+  let intercepted!: () => void
+  const held = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const seen = new Promise<void>((resolve) => {
+    intercepted = resolve
+  })
+  await page.route("**/reports?**", async (route) => {
+    intercepted()
+    await held
+    await route.continue()
+  })
+  try {
+    await period(page, "2030-01-01", "2031-12-31")
+    await seen
+    await expect(
+      page.getByRole("button", { name: "Unduh CSV kejadian", exact: true })
+    ).toBeDisabled()
+    await expect(
+      page.getByRole("button", { name: "Unduh CSV pembayaran", exact: true })
+    ).toBeDisabled()
+    release()
+    await expect(page).toHaveURL(/from=2030-01-01/)
+    await page
+      .getByRole("button", { name: "Unduh CSV kejadian", exact: true })
+      .click()
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Rentang ekspor maksimal" })
+    ).toBeVisible()
+  } finally {
+    release()
+    await page.unroute("**/reports?**")
+  }
+})
 test("reports distinguish cohort, period cashflow, selected allocations, CSV and employee history", async ({
   page,
 }) => {

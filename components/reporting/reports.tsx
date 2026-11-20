@@ -31,7 +31,7 @@ export function Reports() {
     [error, setError] = useState(""),
     [message, setMessage] = useState("")
   const exportFile = async (kind: "fine-cases" | "payments") => {
-    if (busy) return
+    if (busy || url.pending) return
     setBusy(kind)
     setError("")
     setMessage("")
@@ -174,7 +174,7 @@ export function Reports() {
         <div className="flex flex-wrap gap-3">
           <Button
             className="min-h-11"
-            disabled={!!busy}
+            disabled={!!busy || url.pending}
             onClick={() => exportFile("fine-cases")}
           >
             {busy === "fine-cases" ? "Menyiapkan CSV…" : "Unduh CSV kejadian"}
@@ -182,7 +182,7 @@ export function Reports() {
           <Button
             className="min-h-11"
             variant="outline"
-            disabled={!!busy}
+            disabled={!!busy || url.pending}
             onClick={() => exportFile("payments")}
           >
             {busy === "payments" ? "Menyiapkan CSV…" : "Unduh CSV pembayaran"}

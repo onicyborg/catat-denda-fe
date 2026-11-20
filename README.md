@@ -60,3 +60,9 @@ Filter laporan/dashboard/profil finansial memakai URL from/to, employeeId, viola
 Semua route P0 tersedia. tests/zzz-reporting.spec.ts menambah4 skenario: cohort-cashflow lintas bulan dan filter employee/CSV/profil; dashboard retry/responsive/dark; audit filter/paging/payload; settings konflik dua tab, nama150 karakter dan brand. Seluruh suite27 test juga memeriksa regresi auth/master/fine/payment sebelumnya. Build App Router memakai Suspense untuk client query-string hooks sesuai dokumentasi Next yang terpasang.
 
 Kontrak Phase5 kompatibel dengan backend commit `1be7466`. SHA-256 openapi.json: `cc5d7ff3b5a0cd953bd8f7bccd5c9cc4c6cc8cb4e806f86e6682bda75aea5cac`. Types dibuat dengan api:generate; kedua repo tetap mandiri.
+
+## Phase6: release rehearsal
+
+[ops/RELEASE.md](ops/RELEASE.md) menjelaskan build produksi dari lockfile, service loopback, compatibility BE/FE dan smoke HTTPS tiga engine. `pnpm test:release` membutuhkan server rehearsal lokal backend. `pnpm test:e2e` tetap memakai HTTP3100/3101 untuk regresi penuh. Ekspor CSV menunggu transisi filter URL selesai agar tidak mengirim filter sebelumnya. Preset shadcn tetap sama; CLI shadcn kini devDependency dengan patch minimatch transitif.
+
+Rehearsal lokal selesai; staging, domain/certifikat CA, Safari/iOS fisik dan aktivasi backup/monitoring produksi belum diverifikasi. Tidak ada deployment/workflow otomatis pada fase ini.

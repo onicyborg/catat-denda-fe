@@ -1,0 +1,32 @@
+[Unit]
+Description=Catat Denda Next.js
+After=network-online.target catat-denda-backend.service
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+User=catat-web
+Group=catat-web
+WorkingDirectory=/srv/catat-denda/frontend/current
+Environment=NODE_ENV=production
+Environment=API_INTERNAL_URL=http://127.0.0.1:3001
+ExecStart=/usr/bin/node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3000
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/catat-denda/frontend/current/.next/cache
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=catat-web
+
+[Install]
+WantedBy=multi-user.target

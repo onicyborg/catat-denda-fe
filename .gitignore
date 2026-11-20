@@ -39,5 +39,7 @@ pnpm-debug.log*
 next-env.d.ts
 
 .next-qa/
+.next-release/
 test-results/
+test-results-release/
 playwright-report/

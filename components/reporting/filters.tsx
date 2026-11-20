@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,7 @@ import { api } from "@/lib/api"
 import type { Employee, Violation } from "@/lib/master"
 import { currentMonth, reportParams } from "@/lib/reporting"
 export function useReportUrl() {
+  const [pending, startTransition] = useTransition()
   const search = useSearchParams(),
     router = useRouter(),
     path = usePathname(),
@@ -29,10 +30,13 @@ export function useReportUrl() {
     for (const [k, v] of Object.entries(next))
       if (v) params.set(k, v)
       else params.delete(k)
-    router.replace(path + "?" + params.toString(), { scroll: false })
+    startTransition(() => {
+      router.replace(path + "?" + params.toString(), { scroll: false })
+    })
   }
   return {
     values,
+    pending,
     update,
     key: search.toString(),
     base: reportParams({
