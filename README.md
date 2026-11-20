@@ -66,3 +66,7 @@ Kontrak Phase5 kompatibel dengan backend commit `1be7466`. SHA-256 openapi.json:
 [ops/RELEASE.md](ops/RELEASE.md) menjelaskan build produksi dari lockfile, service loopback, compatibility BE/FE dan smoke HTTPS tiga engine. `pnpm test:release` membutuhkan server rehearsal lokal backend. `pnpm test:e2e` tetap memakai HTTP3100/3101 untuk regresi penuh. Ekspor CSV menunggu transisi filter URL selesai agar tidak mengirim filter sebelumnya. Preset shadcn tetap sama; CLI shadcn kini devDependency dengan patch minimatch transitif.
 
 Rehearsal lokal selesai; staging, domain/certifikat CA, Safari/iOS fisik dan aktivasi backup/monitoring produksi belum diverifikasi. Tidak ada deployment/workflow otomatis pada fase ini.
+
+## Redesign ruang kerja
+
+Layout menggunakan sidebar berkelompok, header lokasi halaman/tema/akun, PageHeader konsisten dan susunan settings responsif. Dashboard memiliki grafik penyelesaian kohort dan ranking saldo dari API yang sudah tersedia, dengan nilai IDR yang dapat dibaca tanpa mengandalkan warna. Preset shadcn yang sama tetap digunakan; tidak menambah library grafik. Alasan desain di DESIGN.md, cakupan pengujian dan delivery gate di [ops/UI-REDESIGN-QA.md](ops/UI-REDESIGN-QA.md).

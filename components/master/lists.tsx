@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import { PageHeader } from "@/components/workspace/page-header"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -47,28 +48,26 @@ export function MasterList({ kind }: { kind: "employees" | "violations" }) {
   }
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="mb-2 text-sm text-foreground/65">Master data</p>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            {employee ? "Karyawan" : "Jenis kesalahan"}
-          </h1>
-          <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground/65">
-            {employee
-              ? "Kelola profil, kode, dan alias karyawan. Karyawan yang diarsipkan tetap tersimpan dalam histori."
-              : "Tentukan kategori dan tarif default per orang. Nominal kejadian tetap dapat ditentukan saat pencatatan."}
-          </p>
-        </div>
-        {employee ? (
-          <EmployeeEditor
-            onSaved={() => saved("Karyawan berhasil ditambahkan.")}
-          />
-        ) : (
-          <ViolationEditor
-            onSaved={() => saved("Jenis kesalahan berhasil ditambahkan.")}
-          />
-        )}
-      </header>
+      <PageHeader
+        eyebrow="Data master"
+        title={employee ? "Karyawan" : "Jenis kesalahan"}
+        description={
+          employee
+            ? "Kelola profil, kode, dan alias karyawan. Karyawan yang diarsipkan tetap tersimpan dalam histori."
+            : "Tentukan kategori dan tarif default per orang. Nominal kejadian tetap dapat ditentukan saat pencatatan."
+        }
+        actions={
+          employee ? (
+            <EmployeeEditor
+              onSaved={() => saved("Karyawan berhasil ditambahkan.")}
+            />
+          ) : (
+            <ViolationEditor
+              onSaved={() => saved("Jenis kesalahan berhasil ditambahkan.")}
+            />
+          )
+        }
+      />
       <div className="space-y-4 rounded-xl border bg-background p-4">
         <form
           className="flex flex-wrap gap-3"

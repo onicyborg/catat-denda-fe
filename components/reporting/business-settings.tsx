@@ -150,16 +150,31 @@ function SettingsForm({
     </form>
   )
 }
-export function BusinessBrand() {
+export function useBusinessName() {
   const [name, setName] = useState("Catat Denda")
   useEffect(() => {
     let active = true
+    let pending = false
+    let queued = false
     const refresh = () => {
+      if (!active) return
+      if (pending) {
+        queued = true
+        return
+      }
+      pending = true
       void api<SettingsData>("/settings")
         .then((value) => {
           if (active) setName(value.businessName)
         })
         .catch(() => {})
+        .finally(() => {
+          pending = false
+          if (queued && active) {
+            queued = false
+            refresh()
+          }
+        })
     }
     refresh()
     window.addEventListener("settings-updated", refresh)
@@ -170,10 +185,13 @@ export function BusinessBrand() {
       window.removeEventListener("focus", refresh)
     }
   }, [])
+  return name
+}
+export function BusinessBrand({ name }: { name: string }) {
   return (
     <Link
       href="/dashboard"
-      className="inline-flex min-h-11 min-w-0 flex-1 items-center font-semibold [overflow-wrap:anywhere] break-words"
+      className="flex min-h-11 w-full min-w-0 items-center font-semibold [overflow-wrap:anywhere] break-words"
     >
       <span
         title={name}

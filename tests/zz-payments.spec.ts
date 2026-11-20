@@ -150,7 +150,9 @@ test("partial/full payment, metadata, reversals, history filters and void from U
   await expect(
     page.getByRole("heading", { name: "Detail pembayaran" })
   ).toBeVisible()
-  await expect(page.getByText(/^master\.browser/)).toBeVisible()
+  await expect(
+    page.getByRole("main").getByText(/^master\.browser/)
+  ).toBeVisible()
   await page
     .getByRole("button", { name: "Balikkan pembayaran", exact: true })
     .click()

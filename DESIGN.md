@@ -1,5 +1,17 @@
 # Arah tampilan login Catat Denda
 
+## Redesign ruang kerja, November2026
+
+Permintaan pemilik: seluruh layout lebih profesional dan dashboard memakai grafik, dengan preset yang sama. Direction ruang kerja: register operasional yang terstruktur, ENERGY2 / RHYTHM3 / MOTION0. Preset b1aIuQ2XC, stone/biru, Raleway, radius komponen serta Base UI tetap. Tidak ada aset marketing, avatar atau ilustrasi tambahan. Ikon Remix sesuai fungsi menu/transaksi, bukan dekorasi.
+
+Sidebar desktop240px menetap dengan kelompok Operasional/Data master/Administrasi dari delapan halaman yang sudah tersedia. Header72px menjaga breadcrumb, identitas admin, tema dan logout dapat dijangkau. Ponsel memakai menu dialog yang ada, bukan sidebar yang dipadatkan. Skip link menuju main untuk pengguna keyboard. Panel konten memakai lebar maksimum1600px, gutter16/24/32px, ritme4/8px, permukaan background pada kanvas muted/35. Heading dan aksi halaman diseragamkan melalui PageHeader; form/feedback/empty state dan label tetap nyata. Settings memakai kolom usaha dan akses pada desktop, satu kolom pada ponsel.
+
+Dashboard: empat KPI server tetap dibedakan menurut makna tanggal, lalu dua grafik dengan tujuan berbeda: proporsi penyelesaian kohort dan ranking sisa karyawan. Donut memakai alokasi POSTED periode, dibayar kumulatif/sisa kohort, bukan cashflow periode. Sisa chart memakai pola putus dan label; nilai rupiah/percentage selalu terlihat sebagai alternatif tekstual. Batang horizontal membandingkan maksimal lima karyawan dengan skala maksimum yang sama; ranking lintas periode mengikuti filter identitas/jenis. Perhitungan proporsi memakai BigInt sebelum dibulatkan, nilai rupiah final tetap integer server. Tidak membuat tren waktu, delta atau angka contoh yang tidak didukung API. Chart ringan SVG/CSS dengan token chart preset, tanpa dependensi tambahan atau animasi. Semua chart mempunyai empty/error/loading dan tautan ke detail/laporan nyata.
+
+Grid KPI2/4 kolom agar ringkasan ponsel lebih ringkas; grafik1/2 kolom dan register terbaru/draft1/2 kolom mengikuti ruang yang tersedia. Catatan KPI rinci dan ikon disembunyikan di layar kecil; label dan penjelasan tanggal tetap tersedia. Nama150 karakter, integer besar, viewport320–1920, light/dark, keyboard/kontras wajib diuji. Grafik kosong menjelaskan sumber data, bukan menampilkan nominal fiktif. Rincian saldo masih tersedia lewat disclosure. Primary biru dipakai untuk pencatatan, selected state memakai sidebar token agar teks tetap memenuhi kontras. Tidak mengubah kebijakan bisnis, auth atau kontrak API.
+
+Skill ui-ux-pro-max digunakan: pencarian system-wide mengembalikan style Data-Dense Dashboard, tetapi pattern Enterprise Gateway/promosi tidak sesuai aplikasi internal sehingga tidak diterapkan. Rekomendasi palette/font bukan pengganti preset pemilik. Pencarian domain chart menyarankan horizontal bar untuk ranking dan donut untuk dua bagian dengan label/fallback; stack nextjs menegaskan Link dan layout state preservation. Direction di atas adalah adaptasi yang sudah diperiksa, bukan hasil generator yang disalin mentah.
+
 Halaman akses admin untuk pengelola usaha. Arah visual: buku pencatatan operasional yang tenang, jelas dan mudah dipindai. ENERGY1 / RHYTHM2 / MOTION1.
 
 - Preset shadcn b1aIuQ2XC tetap menjadi dasar: Base UI, stone, primary biru, Raleway, radius dan Button; Input ditambahkan melalui CLI dengan konfigurasi preset yang sama.

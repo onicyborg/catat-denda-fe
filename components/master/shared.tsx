@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/dialog"
 import type { Page } from "@/lib/master"
 export const fieldClass =
-  "h-11 rounded-lg border-muted-foreground bg-background placeholder:text-foreground/60"
+  "h-11 rounded-lg border-muted-foreground bg-background text-base placeholder:text-foreground/60 sm:text-sm"
 export const selectClass =
-  "h-11 w-full rounded-lg border border-muted-foreground bg-background px-3 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+  "h-11 w-full rounded-lg border border-muted-foreground bg-background px-3 text-base text-foreground focus-visible:outline-2 focus-visible:outline-ring sm:text-sm"
 export function useResource<T>(path: string, envelope = false) {
   const [revision, setRevision] = useState(0)
   const key = `${path}:${revision}`
@@ -95,13 +95,16 @@ export function LoadState({
   retry,
   empty,
   children,
+  loadingView,
 }: {
   loading: boolean
   error?: string
   retry: () => void
   empty?: string
   children: ReactNode
+  loadingView?: ReactNode
 }) {
+  if (loading && loadingView) return loadingView
   if (loading)
     return (
       <p

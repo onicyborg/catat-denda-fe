@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import { PageHeader } from "@/components/workspace/page-header"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,14 +28,11 @@ export function PaymentList() {
   )
   return (
     <section className="space-y-6">
-      <div>
-        <p className="mb-2 text-sm text-foreground/65">Buku pembayaran</p>
-        <h1 className="text-3xl font-semibold">Riwayat pembayaran</h1>
-        <p className="mt-3 text-sm text-foreground/65">
-          Pembayaran dan pembalikan tetap tersimpan. Rentang tanggal memakai
-          waktu efektif transaksi dalam WIB.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Buku pembayaran"
+        title="Riwayat pembayaran"
+        description="Pembayaran dan pembalikan tetap tersimpan. Rentang tanggal memakai waktu efektif transaksi dalam WIB."
+      />
       <form
         className="space-y-4 rounded-xl border bg-background p-4 sm:p-5"
         onSubmit={(event) => {

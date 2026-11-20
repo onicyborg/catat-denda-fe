@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import { PageHeader } from "@/components/workspace/page-header"
 import { usePathname, useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -42,14 +43,11 @@ export function AuditLogs() {
     })
   return (
     <section className="space-y-6">
-      <div>
-        <p className="mb-2 text-sm text-foreground/65">Jejak perubahan</p>
-        <h1 className="text-3xl font-semibold">Audit log</h1>
-        <p className="mt-3 text-sm text-foreground/65">
-          Histori hanya baca, mencakup akses admin, perubahan data, pembayaran,
-          dan ekspor.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Jejak perubahan"
+        title="Audit log"
+        description="Histori hanya baca, mencakup akses admin, perubahan data, pembayaran, dan ekspor."
+      />
       <LoadState
         loading={options.loading}
         error={options.error}

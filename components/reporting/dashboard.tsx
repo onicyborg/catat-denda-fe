@@ -1,102 +1,133 @@
 "use client"
 import Link from "next/link"
+import { RiAddLine, RiRefreshLine } from "@remixicon/react"
 import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/workspace/page-header"
 import { LoadState, useResource } from "@/components/master/shared"
 import { Metrics } from "./metrics"
 import { ReportFilters, useReportUrl } from "./filters"
 import { CaseRows, BalanceRows } from "./rows"
+import { SettlementChart, OutstandingChart } from "./dashboard-charts"
 import type { DashboardData } from "@/lib/reporting"
+
+function DashboardPlaceholder() {
+  return (
+    <div role="status" className="space-y-6">
+      <p className="sr-only">Memuat ringkasan…</p>
+      <div aria-hidden="true" className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-32 rounded-xl border bg-background p-5">
+            <div className="h-3 w-3/4 rounded bg-muted" />
+            <div className="mt-6 h-6 w-1/2 rounded bg-muted" />
+          </div>
+        ))}
+      </div>
+      <div aria-hidden="true" className="grid gap-5 xl:grid-cols-2">
+        {[0, 1].map((i) => (
+          <div key={i} className="h-80 rounded-xl border bg-background p-6">
+            <div className="h-4 w-1/2 rounded bg-muted" />
+            <div className="mt-6 h-48 rounded-lg bg-muted/50" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function Dashboard() {
-  const url = useReportUrl(),
-    result = useResource<DashboardData>("/dashboard/summary?" + url.base),
-    data = result.data
+  const url = useReportUrl()
+  const result = useResource<DashboardData>("/dashboard/summary?" + url.base)
+  const data = result.data
   return (
     <section className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="mb-2 text-sm [overflow-wrap:anywhere] break-words text-foreground/65">
-            {data?.summary.businessName ?? "Ruang kerja"}
-          </p>
-          <h1 className="text-3xl font-semibold">Ringkasan</h1>
-          <p className="mt-3 text-sm text-foreground/65">
-            Kejadian periode, arus pembayaran, dan saldo saat ini.
-          </p>
-        </div>
-        <Link
-          className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm text-primary-foreground focus-visible:outline-2"
-          href="/fines/new"
-        >
-          Catat kejadian
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow={data?.summary.businessName ?? "Ruang kerja"}
+        title="Ringkasan"
+        description="Pantau kejadian, penyelesaian alokasi, dan kewajiban yang masih berjalan."
+        actions={
+          <>
+            <Button
+              className="min-h-11 gap-2"
+              variant="outline"
+              onClick={() => result.reload()}
+            >
+              <RiRefreshLine className="size-4" aria-hidden="true" />
+              Segarkan ringkasan
+            </Button>
+            <Link
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-ring"
+              href="/fines/new"
+            >
+              <RiAddLine className="size-4" aria-hidden="true" />
+              Catat kejadian
+            </Link>
+          </>
+        }
+      />
       <ReportFilters key={url.key} values={url.values} onApply={url.update} />
-      <Button
-        className="min-h-11"
-        variant="outline"
-        onClick={() => result.reload()}
-      >
-        Segarkan ringkasan
-      </Button>
       <LoadState
         loading={result.loading}
         error={result.error}
         retry={result.reload}
+        loadingView={<DashboardPlaceholder />}
       >
         {data && (
           <>
             <Metrics data={data.summary} />
-            <section className="space-y-4">
-              <h2 className="text-xl font-semibold">
-                Kejadian terbaru menurut tanggal
-              </h2>
-              <p className="text-sm text-foreground/65">
-                Semua periode; maksimal lima kejadian sesuai filter karyawan dan
-                jenis.
-              </p>
-              {data.recentCases.length ? (
-                <CaseRows rows={data.recentCases} />
-              ) : (
-                <p className="rounded-xl border p-6 text-sm">
-                  Belum ada kejadian diposting.
+            <div className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+              <SettlementChart
+                data={data.summary}
+                reportHref={"/reports?" + url.base}
+              />
+              <OutstandingChart rows={data.topOutstanding} />
+            </div>
+            <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+              <section className="min-w-0 space-y-4 rounded-xl border bg-background p-5 sm:p-6">
+                <h2 className="text-base font-semibold">
+                  Kejadian terbaru menurut tanggal
+                </h2>
+                <p className="text-xs leading-5 text-foreground/65">
+                  Semua periode; maksimal lima kejadian sesuai filter karyawan
+                  dan jenis.
                 </p>
-              )}
-            </section>
-            <section className="space-y-4">
-              <h2 className="text-xl font-semibold">
-                Draft perlu ditinjau ({data.draftCount})
-              </h2>
-              {data.drafts.length ? (
-                <CaseRows rows={data.drafts} />
-              ) : (
-                <p className="rounded-xl border p-6 text-sm">
-                  Tidak ada draft yang perlu ditinjau.
+                {data.recentCases.length ? (
+                  <CaseRows rows={data.recentCases} compact />
+                ) : (
+                  <p className="rounded-lg bg-muted/40 p-5 text-sm text-foreground/65">
+                    Belum ada kejadian diposting.
+                  </p>
+                )}
+              </section>
+              <section className="min-w-0 space-y-4 rounded-xl border bg-background p-5 sm:p-6">
+                <h2 className="text-base font-semibold">
+                  Draft perlu ditinjau ({data.draftCount})
+                </h2>
+                <p className="text-xs leading-5 text-foreground/65">
+                  Lanjutkan melengkapi pencatatan sebelum diposting.
                 </p>
-              )}
-            </section>
-            <section className="space-y-4">
-              <h2 className="text-xl font-semibold">Sisa terbesar saat ini</h2>
-              <p className="text-sm text-foreground/65">
-                Seluruh kejadian POSTED lintas periode, sesuai filter yang
-                dipilih.
-              </p>
-              {data.topOutstanding.length ? (
-                <BalanceRows rows={data.topOutstanding} allDates />
-              ) : (
-                <p className="rounded-xl border p-6 text-sm">
-                  Tidak ada sisa denda aktif.
-                </p>
-              )}
-            </section>
+                {data.drafts.length ? (
+                  <CaseRows rows={data.drafts} compact />
+                ) : (
+                  <p className="rounded-lg bg-muted/40 p-5 text-sm text-foreground/65">
+                    Tidak ada draft yang perlu ditinjau.
+                  </p>
+                )}
+              </section>
+            </div>
+            {data.topOutstanding.length > 0 && (
+              <details className="rounded-xl border bg-background p-5">
+                <summary className="min-h-11 cursor-pointer content-center text-sm font-medium">
+                  Lihat rincian saldo karyawan
+                </summary>
+                <div className="mt-4">
+                  <BalanceRows rows={data.topOutstanding} allDates />
+                </div>
+              </details>
+            )}
           </>
         )}
       </LoadState>
       <div className="flex flex-wrap gap-5 text-sm">
-        <Link
-          className="inline-flex min-h-11 items-center underline underline-offset-4"
-          href={"/reports?" + url.base}
-        >
-          Buka laporan periode
-        </Link>
         <Link
           className="inline-flex min-h-11 items-center underline underline-offset-4"
           href="/employees"

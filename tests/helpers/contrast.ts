@@ -1,5 +1,8 @@
-export async function contrastFailures(page: import("@playwright/test").Page) {
-  return page.evaluate(() => {
+export async function contrastFailures(
+  page: import("@playwright/test").Page,
+  selector = 'main *, [role="dialog"] *'
+) {
+  return page.evaluate((selector) => {
     const canvas = document.createElement("canvas")
     canvas.width = 1
     canvas.height = 1
@@ -27,7 +30,7 @@ export async function contrastFailures(page: import("@playwright/test").Page) {
         .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
         .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0)
     const failures: string[] = []
-    for (const el of document.querySelectorAll('main *, [role="dialog"] *')) {
+    for (const el of document.querySelectorAll(selector)) {
       if (!el.getBoundingClientRect().width) continue
       const hasText = [...el.childNodes].some(
         (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim()
@@ -50,5 +53,5 @@ export async function contrastFailures(page: import("@playwright/test").Page) {
       }
     }
     return failures
-  })
+  }, selector)
 }

@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import { PageHeader } from "@/components/workspace/page-header"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -34,23 +35,19 @@ export function FineList() {
   )
   return (
     <section className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="mb-2 text-sm text-foreground/65">
-            Register operasional
-          </p>
-          <h1 className="text-3xl font-semibold">Kejadian denda</h1>
-          <p className="mt-3 text-sm text-foreground/65">
-            Draft, alokasi, dan histori kejadian dalam satu pencatatan.
-          </p>
-        </div>
-        <Link
-          className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-2"
-          href="/fines/new"
-        >
-          Catat kejadian
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow="Register operasional"
+        title="Kejadian denda"
+        description="Draft, alokasi, dan histori kejadian dalam satu pencatatan."
+        actions={
+          <Link
+            className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-2"
+            href="/fines/new"
+          >
+            Catat kejadian
+          </Link>
+        }
+      />
       <form
         className="space-y-4 rounded-xl border bg-background p-4 sm:p-5"
         onSubmit={(e) => {

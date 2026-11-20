@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react"
+import { PageHeader } from "@/components/workspace/page-header"
 import { Button } from "@/components/ui/button"
 import {
   Feedback,
@@ -48,16 +49,11 @@ export function Reports() {
   }
   return (
     <section className="space-y-6">
-      <div>
-        <p className="mb-2 text-sm [overflow-wrap:anywhere] break-words text-foreground/65">
-          {summary.data?.businessName ?? "Register operasional"}
-        </p>
-        <h1 className="text-3xl font-semibold">Laporan</h1>
-        <p className="mt-3 text-sm text-foreground/65">
-          Rekap kejadian, saldo kohort, dan ekspor dengan definisi tanggal yang
-          sama.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow={summary.data?.businessName ?? "Register operasional"}
+        title="Laporan"
+        description="Rekap kejadian, saldo kohort, dan ekspor dengan definisi tanggal yang sama."
+      />
       <ReportFilters key={url.key} values={v} onApply={url.update} cases />
       <Button
         className="min-h-11"

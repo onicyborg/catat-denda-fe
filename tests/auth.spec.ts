@@ -48,13 +48,14 @@ test("expired session during password mutation redirects to login", async ({
   context,
 }) => {
   await login(page)
-  await context.clearCookies()
   await page
     .getByLabel("Kata sandi lama", { exact: true })
     .fill(credentials.password)
   await page
     .getByLabel("Kata sandi baru (minimal 12 karakter)", { exact: true })
     .fill("temporary-password-123")
+  await page.waitForLoadState("networkidle")
+  await context.clearCookies()
   await page.getByRole("button", { name: "Simpan kata sandi" }).click()
   await expect(page).toHaveURL(/login$/)
 })
