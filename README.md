@@ -34,3 +34,15 @@ Simpan draft mempertahankan null untuk nominal/tanggal/identitas yang belum past
 Detail menampilkan snapshot histori, alokasi, saldo backend, dan metadata lifecycle. Koreksi finansial hanya sebelum pernah ada ledger; setelah itu hanya deskripsi. Pembatalan memerlukan alasan dan saldo pembayaran bersih0. Ledger yang sudah ada dapat dibaca; pencatatan pembayaran/reversal tersedia pada Phase4. Browser QA tests/z-fines.spec.ts mencakup mobile320px/desktop1440px, tarif manual, posting/koreksi/void, kegagalan posting, response create/post terputus, stale version, keyboard, state error/empty dan regresi kontrak.
 
 Kontrak Phase3 kompatibel dengan backend commit `8f91acf`. SHA-256 openapi.json: `aa96b0810eeac8afb572cd6d94b3e6e0181fc88af1b8a5146eb51fc67136548e`. Artifact kontrak disalin dan types dihasilkan lokal; build tidak mengimpor source backend.
+
+## Phase4: pembayaran dan pembalikan
+
+Detail kejadian POSTED menyediakan Catat pembayaran untuk setiap peserta yang masih mempunyai sisa. Nominal default sisa, dapat dibayar parsial; dialog menampilkan preview sisa sesudah dan saldo final tetap diperiksa backend. Metode Tunai/Transfer/Lainnya, tanggal efektif WIB dan catatan tersedia. Pembayaran pada master karyawan yang diarsipkan tetap dapat dicatat untuk alokasi historis.
+
+`/payments` menyediakan history PAYMENT/REVERSAL dengan filter tanggal efektif WIB, karyawan dan jenis transaksi serta paging. `/payments/[id]` menampilkan nominal, tanggal efektif, waktu dicatat, aktor, metode, catatan, ID dan tautan referensi. Pembalikan memerlukan alasan, mengambil nominal penuh transaksi asli di server, dan menghasilkan entry baru. Case yang pernah mempunyai ledger tetap hanya dapat dikoreksi deskripsinya setelah seluruh pembayaran dibalik.
+
+Key/payload transaksi tertunda disimpan pada state dialog selama halaman masih terbuka; penutupan dan pembukaan ulang dialog mempertahankannya. Koneksi/5xx/429/retryable409 mempertahankan isian yang dikunci dan menawarkan konfirmasi transaksi yang sama. Error definitif4xx mempertahankan input untuk koreksi atau Muat saldo terbaru. Aksi baru sesudah transaksi terkonfirmasi mendapat key baru. Reload penuh/navigasi meninggalkan state dalam memori; tinjau ledger terbaru sebelum membuat aksi baru. Tidak menyimpan credential atau catatan pembayaran pada localStorage. Success memperbarui saldo/detail dari backend; tidak mengedit settlement secara manual.
+
+tests/zz-payments.spec.ts menguji UAT parsial/penuh/reversal/void, dua form concurrent, respons pembayaran/reversal terputus dan retry setelah dialog dibuka ulang, metadata, paging21 entry, filter tanggal efektif, empty/error recovery, keyboard/focus, kontras terang/gelap dan overflow halaman/dialog pada320px. Dialog menggunakan tanggal berpresisi menit secara default, mempertahankan presisi asli bila diperlukan agar reversal tidak mendahului pembayaran.
+
+Kontrak Phase4 kompatibel dengan backend commit `375bbe4`. SHA-256 openapi.json kedua repo: `48c03a6d6f484a2e11315cc9c653ae11eda924a0a7ace2929f8ada3567b6186e`. Artifact ini menghasilkan lib/api-schema.d.ts; tidak ada import source lintas repo.

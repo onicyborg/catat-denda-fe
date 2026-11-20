@@ -1,5 +1,7 @@
 "use client"
 import Link from "next/link"
+import { LedgerAction } from "@/components/payments/action"
+import { methods } from "@/lib/payments"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -171,6 +173,22 @@ export function FineDetail({ id }: { id: string }) {
                               <p>Sisa {money(m.outstandingAmount)}</p>
                             </div>
                           )}
+                          {c.status === "POSTED" &&
+                            BigInt(m.outstandingAmount) > BigInt(0) && (
+                              <LedgerAction
+                                mode="payment"
+                                target={m.id}
+                                name={m.employeeDisplayName}
+                                amount={m.outstandingAmount}
+                                onRefresh={resource.reload}
+                                onDone={() => {
+                                  setMessage(
+                                    "Pembayaran berhasil dicatat. Saldo sudah diperbarui."
+                                  )
+                                  resource.reload()
+                                }}
+                              />
+                            )}
                           {m.entries.length > 0 && (
                             <details className="text-sm">
                               <summary className="cursor-pointer py-3 focus-visible:outline-2">
@@ -190,8 +208,53 @@ export function FineDetail({ id }: { id: string }) {
                                     </p>
                                     <p className="text-xs text-foreground/65">
                                       {wib(entry.effectiveAt)} ·{" "}
-                                      {entry.method ?? "Pembalikan"}
+                                      {entry.method
+                                        ? methods[entry.method]
+                                        : "Pembalikan"}
                                     </p>
+                                    <p className="text-xs break-all text-foreground/65">
+                                      Dicatat {wib(entry.createdAt)} · Aktor{" "}
+                                      {entry.recordedBy}
+                                    </p>
+                                    <Link
+                                      className="inline-flex min-h-11 items-center text-sm underline underline-offset-4"
+                                      href={"/payments/" + entry.id}
+                                    >
+                                      Detail transaksi
+                                    </Link>
+                                    {entry.originalPaymentId && (
+                                      <Link
+                                        className="inline-flex min-h-11 items-center text-sm underline underline-offset-4"
+                                        href={
+                                          "/payments/" + entry.originalPaymentId
+                                        }
+                                      >
+                                        Pembayaran asli
+                                      </Link>
+                                    )}
+                                    {c.status === "POSTED" &&
+                                      entry.kind === "PAYMENT" &&
+                                      !m.entries.some(
+                                        (other) =>
+                                          other.originalPaymentId === entry.id
+                                      ) && (
+                                        <LedgerAction
+                                          mode="reverse"
+                                          target={entry.id}
+                                          name={m.employeeDisplayName}
+                                          amount={String(entry.amount)}
+                                          originalEffectiveAt={
+                                            entry.effectiveAt
+                                          }
+                                          onRefresh={resource.reload}
+                                          onDone={() => {
+                                            setMessage(
+                                              "Pembayaran berhasil dibalik. Saldo sudah diperbarui."
+                                            )
+                                            resource.reload()
+                                          }}
+                                        />
+                                      )}
                                     {entry.note && (
                                       <p className="break-words">
                                         {entry.note}

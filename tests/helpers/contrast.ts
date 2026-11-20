@@ -27,7 +27,7 @@ export async function contrastFailures(page: import("@playwright/test").Page) {
         .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
         .reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0)
     const failures: string[] = []
-    for (const el of document.querySelectorAll("main *")) {
+    for (const el of document.querySelectorAll('main *, [role="dialog"] *')) {
       if (!el.getBoundingClientRect().width) continue
       const hasText = [...el.childNodes].some(
         (n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim()

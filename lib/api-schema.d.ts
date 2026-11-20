@@ -324,6 +324,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PaymentsController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/payments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["PaymentsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/payments/{id}/reverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["PaymentsController_reverse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/fine-members/{id}/payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["MemberPaymentsController_pay"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -519,6 +583,50 @@ export interface components {
         FineVoidDto: {
             version: number;
             reason: string;
+        };
+        PaymentResponse: {
+            id: string;
+            /** @enum {string} */
+            kind: "PAYMENT" | "REVERSAL";
+            amount: number;
+            /** @enum {string|null} */
+            method: "CASH" | "TRANSFER" | "OTHER" | null;
+            effectiveAt: string;
+            createdAt: string;
+            recordedBy: string;
+            originalPaymentId: string | null;
+            note: string | null;
+            signedAmount: string;
+            recordedByName: string;
+            caseId: string;
+            caseCode: string;
+            /** @enum {string} */
+            caseStatus: "DRAFT" | "POSTED" | "VOIDED";
+            memberId: string;
+            employeeId: string | null;
+            employeeName: string;
+            reversalId: string | null;
+            canReverse: boolean;
+        };
+        PaymentsEnvelope: {
+            data: components["schemas"]["PaymentResponse"][];
+            meta: components["schemas"]["PageMetaResponse"];
+        };
+        PaymentEnvelope: {
+            data: components["schemas"]["PaymentResponse"];
+        };
+        ReverseDto: {
+            reason: string;
+            /** Format: date-time */
+            effectiveAt: string;
+        };
+        PaymentDto: {
+            amount: number;
+            /** @enum {string} */
+            method: "CASH" | "TRANSFER" | "OTHER";
+            /** Format: date-time */
+            effectiveAt: string;
+            note?: string | null;
         };
     };
     responses: never;
@@ -1195,6 +1303,110 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FineEnvelope"];
+                };
+            };
+        };
+    };
+    PaymentsController_list: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                employeeId?: string;
+                caseId?: string;
+                kind?: "PAYMENT" | "REVERSAL";
+                page?: Record<string, never>;
+                limit?: Record<string, never>;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentsEnvelope"];
+                };
+            };
+        };
+    };
+    PaymentsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentEnvelope"];
+                };
+            };
+        };
+    };
+    PaymentsController_reverse: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReverseDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentEnvelope"];
+                };
+            };
+        };
+    };
+    MemberPaymentsController_pay: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentEnvelope"];
                 };
             };
         };

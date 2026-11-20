@@ -5,7 +5,8 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public fields: string[] = []
+    public fields: string[] = [],
+    public retryable: boolean = false
   ) {
     super(message)
   }
@@ -35,7 +36,8 @@ export async function apiEnvelope<T>(
         ? body.error.message.join(". ")
         : (body.error?.message ?? "Permintaan gagal. Silakan ulangi."),
       res.status,
-      body.error?.details?.fields ?? []
+      body.error?.details?.fields ?? [],
+      body.error?.details?.retryable === true
     )
   }
   return body

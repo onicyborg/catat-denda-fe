@@ -171,7 +171,7 @@ export function FineList() {
                 <div className="flex flex-wrap items-center gap-3">
                   <Link
                     href={"/fines/" + c.id}
-                    className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-2"
+                    className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-2 dark:text-foreground"
                   >
                     {c.displayCode}
                   </Link>
