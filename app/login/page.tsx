@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { useRouter } from "next/navigation"
 import {
   RiFileList3Line,
@@ -14,15 +14,47 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { FinanceAnimation } from "@/components/finance-animation"
 import { api } from "@/lib/api"
+import credentialStyles from "./credentials.module.css"
+
+const subscribeToHydration = () => () => {}
+const clientReady = () => true
+const serverReady = () => false
 
 export default function Login() {
+  const ready = useSyncExternalStore(
+    subscribeToHydration,
+    clientReady,
+    serverReady
+  )
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const usernameInput = useRef<HTMLInputElement>(null)
+  const passwordInput = useRef<HTMLInputElement>(null)
+  const interacted = useRef({ username: false, password: false })
+  const clearAutofill = (field: "username" | "password") => {
+    if (interacted.current[field]) return
+    const input =
+      field === "username" ? usernameInput.current : passwordInput.current
+    if (input) input.value = ""
+    if (field === "username") setUsername("")
+    else setPassword("")
+  }
   useEffect(() => {
-    const clear = () => {
-      setUsername("")
-      setPassword("")
+    const clear = (event?: PageTransitionEvent) => {
+      // Reset native restored values even when React already holds an empty string.
+      // An initial pageshow can arrive late; preserve anything the user has typed.
+      if (event?.persisted || !interacted.current.username) {
+        if (usernameInput.current) usernameInput.current.value = ""
+        setUsername("")
+      }
+      if (event?.persisted || !interacted.current.password) {
+        if (passwordInput.current) passwordInput.current.value = ""
+        setPassword("")
+      }
+      if (event?.persisted)
+        interacted.current = { username: false, password: false }
     }
+    clear()
     window.addEventListener("pageshow", clear)
     return () => window.removeEventListener("pageshow", clear)
   }, [])
@@ -138,16 +170,31 @@ export default function Login() {
                 </label>
                 <Input
                   id="username"
+                  ref={usernameInput}
+                  disabled={!ready}
+                  onFocus={() => {
+                    interacted.current.username = true
+                  }}
+                  onKeyDown={() => {
+                    interacted.current.username = true
+                  }}
+                  onAnimationStart={() => clearAutofill("username")}
                   name="username"
                   autoComplete="off"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => {
+                    if (!interacted.current.username) {
+                      clearAutofill("username")
+                      return
+                    }
+                    setUsername(e.target.value)
+                  }}
                   autoCapitalize="none"
                   spellCheck={false}
                   maxLength={254}
                   required
                   placeholder="Masukkan username"
-                  className="h-12 rounded-lg border-muted-foreground bg-muted/40 px-3.5 placeholder:text-foreground/65"
+                  className={`${credentialStyles.field} h-12 rounded-lg border-muted-foreground bg-muted/40 px-3.5 placeholder:text-foreground/65`}
                   aria-describedby={error ? "login-error" : undefined}
                 />
               </div>
@@ -158,15 +205,30 @@ export default function Login() {
                 <div className="relative">
                   <Input
                     id="password"
+                    ref={passwordInput}
+                    disabled={!ready}
+                    onFocus={() => {
+                      interacted.current.password = true
+                    }}
+                    onKeyDown={() => {
+                      interacted.current.password = true
+                    }}
+                    onAnimationStart={() => clearAutofill("password")}
                     name="password"
                     type={visible ? "text" : "password"}
                     autoComplete="off"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      if (!interacted.current.password) {
+                        clearAutofill("password")
+                        return
+                      }
+                      setPassword(e.target.value)
+                    }}
                     maxLength={256}
                     required
                     placeholder="Masukkan kata sandi"
-                    className="h-12 rounded-lg border-muted-foreground bg-muted/40 pr-12 pl-3.5 placeholder:text-foreground/65"
+                    className={`${credentialStyles.field} h-12 rounded-lg border-muted-foreground bg-muted/40 pr-12 pl-3.5 placeholder:text-foreground/65`}
                     aria-describedby={error ? "login-error" : undefined}
                   />
                   <Button
@@ -201,7 +263,7 @@ export default function Login() {
               )}
               <Button
                 type="submit"
-                disabled={busy}
+                disabled={!ready || busy}
                 className="mt-1 h-12 w-full"
               >
                 {busy ? "Sedang masuk…" : "Masuk"}

@@ -191,3 +191,85 @@ test("login starts blank and clears restored credentials", async ({ page }) => {
   await expect(username).toHaveValue("")
   await expect(password).toHaveValue("")
 })
+
+test("login clears browser-restored DOM values even when React state is already empty", async ({
+  page,
+}) => {
+  await page.goto("/login")
+  await expect(
+    page.getByRole("button", { name: "Masuk", exact: true })
+  ).toBeVisible()
+  await page.evaluate(() => {
+    for (const id of ["username", "password"]) {
+      const input = document.getElementById(id) as HTMLInputElement
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value"
+      )!.set!.call(input, "browser-saved-value")
+    }
+    window.dispatchEvent(
+      new PageTransitionEvent("pageshow", { persisted: true })
+    )
+  })
+  await expect(page.getByLabel("Username", { exact: true })).toHaveValue("")
+  await expect(page.getByLabel("Kata sandi", { exact: true })).toHaveValue("")
+})
+
+test("late autofill is cleared before interaction but typed values are preserved", async ({
+  page,
+}) => {
+  await page.goto("/login")
+  await expect(
+    page.getByRole("button", { name: "Masuk", exact: true })
+  ).toBeVisible()
+  const username = page.getByLabel("Username", { exact: true }),
+    password = page.getByLabel("Kata sandi", { exact: true })
+  await page.evaluate(() => {
+    for (const id of ["username", "password"]) {
+      const input = document.getElementById(id) as HTMLInputElement
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value"
+      )!.set!.call(input, "late-browser-autofill")
+      input.dispatchEvent(
+        new AnimationEvent("animationstart", {
+          bubbles: true,
+          animationName: "autofill-detected",
+        })
+      )
+    }
+  })
+  await expect(username).toHaveValue("")
+  await expect(password).toHaveValue("")
+  await username.fill("manually-typed-user")
+  await password.fill("manually-typed-password")
+  await page.evaluate(() => {
+    for (const id of ["username", "password"])
+      document.getElementById(id)!.dispatchEvent(
+        new AnimationEvent("animationstart", {
+          bubbles: true,
+          animationName: "autofill-detected",
+        })
+      )
+    window.dispatchEvent(new Event("focus"))
+  })
+  await expect(username).toHaveValue("manually-typed-user")
+  await expect(password).toHaveValue("manually-typed-password")
+})
+
+test("initial pageshow arriving after typing does not erase manual credentials", async ({
+  page,
+}) => {
+  await page.goto("/login")
+  const username = page.getByLabel("Username", { exact: true }),
+    password = page.getByLabel("Kata sandi", { exact: true })
+  await username.fill("typed-before-pageshow")
+  await password.fill("manual-password")
+  await page.evaluate(() =>
+    window.dispatchEvent(
+      new PageTransitionEvent("pageshow", { persisted: false })
+    )
+  )
+  await expect(username).toHaveValue("typed-before-pageshow")
+  await expect(password).toHaveValue("manual-password")
+})
