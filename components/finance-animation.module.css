@@ -1,0 +1,100 @@
+.scene {
+  position: relative;
+  margin-top: 1.5rem;
+}
+.shadow {
+  fill: var(--foreground);
+  opacity: 0.05;
+}
+.paper {
+  fill: var(--background);
+  stroke: color-mix(in oklch, var(--foreground) 30%, transparent);
+  stroke-width: 1.5;
+}
+.lines {
+  stroke: color-mix(in oklch, var(--foreground) 25%, transparent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.back {
+  fill: var(--muted);
+  stroke: color-mix(in oklch, var(--foreground) 35%, transparent);
+  stroke-width: 1.5;
+}
+.wallet {
+  fill: var(--background);
+  stroke: color-mix(in oklch, var(--foreground) 60%, transparent);
+  stroke-width: 1.5;
+}
+.seam {
+  stroke: color-mix(in oklch, var(--foreground) 20%, transparent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+.accent {
+  fill: var(--primary);
+}
+.clasp {
+  fill: var(--primary-foreground);
+}
+.coin {
+  fill: var(--background);
+  stroke: var(--primary);
+  stroke-width: 2;
+}
+.coinRing {
+  fill: color-mix(in oklch, var(--primary) 8%, var(--background));
+  stroke: var(--primary);
+  stroke-width: 1;
+}
+.coinMark {
+  stroke: var(--primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.receipt {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: receipt-drift 8s ease-in-out infinite;
+}
+.coinOne {
+  animation: coin-drift 6s ease-in-out infinite;
+}
+.coinTwo {
+  animation: coin-drift 6s -2s ease-in-out infinite;
+}
+.coinThree {
+  animation: coin-drift 6s -4s ease-in-out infinite;
+}
+.scene[data-paused="true"] :is(.receipt, .coinOne, .coinTwo, .coinThree) {
+  animation-play-state: paused;
+}
+@keyframes coin-drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+@keyframes receipt-drift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(0deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .receipt,
+  .coinOne,
+  .coinTwo,
+  .coinThree {
+    animation: none;
+  }
+  .control {
+    display: none;
+  }
+}

@@ -12,6 +12,7 @@ import {
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { FinanceAnimation } from "@/components/finance-animation"
 import { api } from "@/lib/api"
 
 export default function Login() {
@@ -70,42 +71,13 @@ export default function Login() {
                 <br className="hidden lg:block" /> hingga penyelesaian.
               </h2>
               <p className="mt-4 hidden max-w-sm text-sm leading-relaxed text-foreground/65 sm:block">
-                Ruang kerja untuk mencatat kejadian, merinci nominal per
-                karyawan, dan menelusuri penyelesaiannya.
+                Ruang kerja pengelola untuk mencatat kejadian dan menjaga
+                riwayat operasional tetap tertata.
               </p>
             </div>
-            <figure className="mt-10 hidden rounded-xl border bg-background lg:block">
-              <figcaption className="flex items-center justify-between border-b px-5 py-4 text-xs">
-                <span className="font-medium">Contoh alokasi</span>
-                <span className="text-foreground/65">
-                  1 kejadian · 2 karyawan
-                </span>
-              </figcaption>
-              <div className="px-5">
-                {["Karyawan A", "Karyawan B"].map((name, index) => (
-                  <div
-                    key={name}
-                    className="flex items-center justify-between gap-4 border-b py-4 text-sm"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="text-xs text-foreground/65">
-                        0{index + 1}
-                      </span>
-                      {name}
-                    </span>
-                    <span className="font-medium tabular-nums">Rp5.000</span>
-                  </div>
-                ))}
-                <div className="flex items-center justify-between py-5 text-sm">
-                  <span className="text-foreground/65">Total kejadian</span>
-                  <span className="text-xl font-semibold text-primary tabular-nums dark:text-foreground">
-                    Rp10.000
-                  </span>
-                </div>
-              </div>
-            </figure>
+            <FinanceAnimation />
             <p className="mt-8 hidden text-xs text-foreground/65 lg:block">
-              Satu kejadian, rincian tanggung jawab per orang.
+              Catatan tertata, pekerjaan lebih tenang.
             </p>
           </section>
           <section
@@ -227,7 +199,7 @@ export default function Login() {
         </div>
         <footer className="mt-5 flex flex-wrap justify-between gap-2 text-xs text-foreground/65 lg:mt-7">
           <span>Pencatatan Denda Karyawan</span>
-          <span>Rupiah (IDR) · Waktu Indonesia Barat</span>
+          <span>Waktu Indonesia Barat</span>
         </footer>
       </div>
     </main>

@@ -108,3 +108,67 @@ test("login layout, password visibility and themes", async ({ page }) => {
   await expect(password).toBeFocused()
   expect(errors).toEqual([])
 })
+
+test("finance animation loops, pauses and respects reduced motion without amounts", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 960 })
+  await page.goto("/login")
+  const illustration = page.getByRole("img", {
+    name: "Ilustrasi animasi dompet dan koin",
+  })
+  await expect(illustration).toBeVisible()
+  await expect(page.locator("main")).not.toContainText(
+    /Rp\s?\d|Karyawan A|Karyawan B|Contoh alokasi|Total kejadian/
+  )
+  expect(
+    await illustration.evaluate((el) =>
+      el
+        .getAnimations({ subtree: true })
+        .every(
+          (animation) => animation.effect?.getTiming().iterations === Infinity
+        )
+    )
+  ).toBeTruthy()
+  const time = await illustration.evaluate((el) =>
+    Number(el.getAnimations({ subtree: true })[0]?.currentTime ?? 0)
+  )
+  await expect
+    .poll(() =>
+      illustration.evaluate((el) =>
+        Number(el.getAnimations({ subtree: true })[0]?.currentTime ?? 0)
+      )
+    )
+    .toBeGreaterThan(time)
+  await page.getByRole("button", { name: "Jeda animasi", exact: true }).click()
+  await expect
+    .poll(() =>
+      illustration.evaluate((el) =>
+        el
+          .getAnimations({ subtree: true })
+          .every((animation) => animation.playState === "paused")
+      )
+    )
+    .toBeTruthy()
+  await page
+    .getByRole("button", { name: "Lanjutkan animasi", exact: true })
+    .click()
+  await expect
+    .poll(() =>
+      illustration.evaluate((el) =>
+        el
+          .getAnimations({ subtree: true })
+          .every((animation) => animation.playState === "running")
+      )
+    )
+    .toBeTruthy()
+  await page.emulateMedia({ reducedMotion: "reduce" })
+  await expect
+    .poll(() =>
+      illustration.evaluate((el) => el.getAnimations({ subtree: true }).length)
+    )
+    .toBe(0)
+  await expect(
+    page.getByRole("button", { name: "Jeda animasi", exact: true })
+  ).toBeHidden()
+})
