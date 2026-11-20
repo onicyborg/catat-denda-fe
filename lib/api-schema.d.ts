@@ -180,7 +180,9 @@ export interface operations {
     AuthController_logout: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -190,14 +192,22 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        data: {
+                            success: boolean;
+                        };
+                    };
+                };
             };
         };
     };
     AuthController_password: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -208,6 +218,26 @@ export interface operations {
         };
         responses: {
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: {
+                            success: boolean;
+                        };
+                    };
+                };
+            };
+            /** @description Sesi tidak berlaku. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Isian tidak valid atau kata sandi lama salah. */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

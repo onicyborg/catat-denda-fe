@@ -54,11 +54,8 @@
             }
           }
         },
-        "security": [
-          {
-            "cookie": []
-          }
-        ],
+        "security": [],
+        "summary": "",
         "tags": [
           "auth"
         ]
@@ -120,10 +117,42 @@
     "/api/v1/auth/logout": {
       "post": {
         "operationId": "AuthController_logout",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "success"
+                      ],
+                      "properties": {
+                        "success": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -139,7 +168,16 @@
     "/api/v1/auth/change-password": {
       "post": {
         "operationId": "AuthController_password",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -152,7 +190,36 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "required": [
+                        "success"
+                      ],
+                      "properties": {
+                        "success": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesi tidak berlaku."
+          },
+          "422": {
+            "description": "Isian tidak valid atau kata sandi lama salah."
           }
         },
         "security": [

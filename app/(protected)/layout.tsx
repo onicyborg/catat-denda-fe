@@ -7,23 +7,37 @@ const Context = createContext<Admin | null>(null)
 export const useAdmin = () => useContext(Context)!
 export default function Protected({ children }: { children: React.ReactNode }) {
   const [admin, setAdmin] = useState<Admin | null>(null)
+  const [loggingOut, setLoggingOut] = useState(false)
   const [error, setError] = useState("")
   useEffect(() => {
     let active = true
-    const load = () =>
-      api<Admin>("/auth/me")
+    let pending = false
+    const load = () => {
+      if (pending || !active) return
+      pending = true
+      return api<Admin>("/auth/me")
         .then((user) => {
-          if (active) setAdmin(user)
+          if (active) {
+            setAdmin(user)
+            setError("")
+          }
         })
         .catch((err) => {
           if (active) {
-            setAdmin(null)
             setError(err.message)
           }
         })
+        .finally(() => {
+          pending = false
+        })
+    }
+    const expire = () => {
+      active = false
+      setAdmin(null)
+    }
+    window.addEventListener("session-expired", expire)
     void load()
     const onFocus = () => {
-      setAdmin(null)
       void load()
     }
     window.addEventListener("focus", onFocus)
@@ -32,6 +46,7 @@ export default function Protected({ children }: { children: React.ReactNode }) {
     }, 60000)
     return () => {
       active = false
+      window.removeEventListener("session-expired", expire)
       clearInterval(timer)
       window.removeEventListener("focus", onFocus)
     }
@@ -59,20 +74,24 @@ export default function Protected({ children }: { children: React.ReactNode }) {
           <Link href="/settings">Akun</Link>
           <Button
             variant="outline"
+            disabled={loggingOut}
             onClick={async () => {
+              setLoggingOut(true)
               try {
                 await api("/auth/logout", {
                   method: "POST",
                   headers: { "X-CSRF-Token": admin.csrfToken },
                 })
-                setAdmin(null)
+                window.dispatchEvent(new Event("session-expired"))
                 window.location.replace("/login")
               } catch (err) {
                 setError((err as Error).message)
+              } finally {
+                setLoggingOut(false)
               }
             }}
           >
-            Keluar
+            {loggingOut ? "Keluar…" : "Keluar"}
           </Button>
         </nav>
       </header>

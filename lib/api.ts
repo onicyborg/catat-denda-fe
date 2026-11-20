@@ -10,17 +10,17 @@ export async function api<T>(
     credentials: "same-origin",
     cache: "no-store",
     headers: { "Content-Type": "application/json", ...options.headers },
+  }).catch(() => {
+    throw new Error("Layanan belum dapat dihubungi. Silakan ulangi.")
   })
   const body = await res.json().catch(() => {
     throw new Error("Layanan belum dapat dihubungi. Silakan ulangi.")
   })
   if (!res.ok) {
-    if (
-      res.status === 401 &&
-      path !== "/auth/login" &&
-      path !== "/auth/change-password"
-    )
+    if (res.status === 401 && path !== "/auth/login") {
+      window.dispatchEvent(new Event("session-expired"))
       window.location.replace("/login")
+    }
     throw new Error(
       Array.isArray(body.error?.message)
         ? body.error.message.join(". ")
