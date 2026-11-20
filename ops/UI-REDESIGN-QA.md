@@ -97,3 +97,12 @@ Status berikut berlaku pada scope redesign dan didukung build,29 regresi UI,3 sm
 | C-5 | PASS: tidak mengklaim data, performa atau deployment yang tidak diukur |
 
 Pemeriksaan tambahan setelah review visual: targeted chart/keyboard test1/1 PASS (5.1detik), termasuk focus skip link ke main dan memastikan heading tidak tertutup sticky header. Lint/typecheck/production build diulang dan lulus setelah scroll margin disesuaikan. Preview dashboard1440×1050 diambil dari skenario40% dengan data QA yang sama.
+
+## Kartu kejadian dan pagination (21 November 2026)
+
+- Scope: daftar `/fines`; preset, tema, filter dan aturan backend tetap. Urutan backend `createdAt DESC, id DESC`; default enam kartu dengan pilihan 6/12/24.
+- Kartu responsif satu/dua/tiga kolom. Seluruh area berupa satu Next Link, dengan label detail, hover/pressed feedback, dan fokus keyboard. Nominal draft belum lengkap tidak ditampilkan sebagai nol.
+- Pengujian data sintetis memakai schema PostgreSQL QA terisolasi, bukan Neon produksi. Tiga pengujian kartu mencakup 13 kejadian, urutan pencatatan berbeda dari tanggal kejadian, klik peserta, Enter, fokus setelah paging, halaman terakhir, ukuran halaman, reset filter, loading, error/retry, hasil kosong, status POSTED/VOIDED, serta draft tidak lengkap.
+- Empat pengujian browser kejadian yang sudah ada lulus: alokasi/posting/koreksi/filter/pembatalan, draft tidak lengkap, respons create hilang, dan respons posting hilang.
+- Inspeksi screenshot light/dark pada 320/375/768/1440px dan landscape 812×375; tidak ada overflow horizontal, pemeriksaan kontras teks lulus, reduced motion aktif, target pagination 44px. Hover tombol filter diperkuat menjadi primary/90 setelah pemeriksaan menemukan kontras kurang.
+- `pnpm lint`, `pnpm typecheck`, dan build produksi dengan `.next-release` berhasil. Screenshot QA: `/tmp/catat-denda-cards-{light,dark}-{320,375,768,1440}.png` (fixture sintetis).

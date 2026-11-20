@@ -1,24 +1,19 @@
 "use client"
 import Link from "next/link"
 import { PageHeader } from "@/components/workspace/page-header"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   LoadState,
-  Pager,
   useResource,
   fieldClass,
   selectClass,
 } from "@/components/master/shared"
 import { Picker } from "./picker"
-import {
-  caseLabels,
-  settlementLabels,
-  money,
-  wib,
-  type Fine,
-} from "@/lib/fines"
+import { caseLabels, type Fine } from "@/lib/fines"
+import { FineCard } from "./card"
+import { FinePagination } from "./pagination"
 import type { Page, Employee, Violation } from "@/lib/master"
 export function FineList() {
   const [q, setQ] = useState(""),
@@ -28,11 +23,26 @@ export function FineList() {
     [employee, setEmployee] = useState<Employee | null>(null),
     [type, setType] = useState<Violation | null>(null),
     [page, setPage] = useState(1),
+    [limit, setLimit] = useState(6),
     [query, setQuery] = useState("")
   const result = useResource<Page<Fine>>(
-    `/fine-cases?page=${page}${query}`,
+    `/fine-cases?page=${page}&limit=${limit}${query}`,
     true
   )
+  const heading = useRef<HTMLHeadingElement>(null)
+  const focusResults = useRef(false)
+  useEffect(() => {
+    if (!result.loading && focusResults.current) {
+      focusResults.current = false
+      heading.current?.focus({ preventScroll: true })
+      heading.current?.scrollIntoView({ block: "start" })
+    }
+  }, [result.loading])
+  const changePage = (next: number) => {
+    if (next === page) return
+    focusResults.current = true
+    setPage(next)
+  }
   return (
     <section className="space-y-6">
       <PageHeader
@@ -126,7 +136,7 @@ export function FineList() {
             all
             onPick={(v) => setType(v as Violation)}
           />
-          <Button type="submit" className="min-h-11">
+          <Button type="submit" className="min-h-11 hover:bg-primary/90">
             Terapkan filter
           </Button>
           <Button
@@ -148,82 +158,92 @@ export function FineList() {
           </Button>
         </div>
       </form>
-      <LoadState
-        loading={result.loading}
-        error={result.error}
-        retry={result.reload}
-        empty={
-          result.data?.data.length === 0
-            ? "Belum ada kejadian yang sesuai. Catat kejadian baru atau ubah filter."
-            : undefined
-        }
-      >
-        <div className="divide-y rounded-xl border bg-background">
-          {result.data?.data.map((c) => (
-            <article
-              key={c.id}
-              className="grid gap-4 p-4 sm:p-6 md:grid-cols-[minmax(0,1fr)_auto]"
+      <section aria-labelledby="fine-results-heading" className="space-y-5">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2
+              ref={heading}
+              id="fine-results-heading"
+              tabIndex={-1}
+              className="scroll-mt-24 text-lg font-semibold focus-visible:outline-2 focus-visible:outline-offset-4"
             >
-              <div className="min-w-0 space-y-2">
-                <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    href={"/fines/" + c.id}
-                    className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-2 dark:text-foreground"
-                  >
-                    {c.displayCode}
-                  </Link>
-                  <span className="text-xs">{caseLabels[c.status]}</span>
-                  {c.settlementStatus && (
-                    <span className="text-xs text-foreground/65">
-                      {
-                        settlementLabels[
-                          c.settlementStatus as keyof typeof settlementLabels
-                        ]
-                      }
-                    </span>
-                  )}
-                </div>
-                <p className="font-medium break-words">
-                  {c.violationNameSnapshot ??
-                    c.violationType?.name ??
-                    "Jenis belum dipilih"}
-                </p>
-                <p className="text-xs text-foreground/65">
-                  {wib(c.occurredAt)}
-                </p>
-                <p className="text-sm break-words">
-                  {c.description || "Deskripsi belum diisi"}
-                </p>
-                <p className="text-xs break-words text-foreground/65">
-                  {c.members.length
-                    ? c.members.map((m) => m.employeeDisplayName).join(", ")
-                    : "Belum ada peserta"}
-                </p>
-              </div>
-              <div className="space-y-2 md:text-right">
-                <p className="text-xs text-foreground/65">
-                  {c.status === "DRAFT"
-                    ? "Preview alokasi"
-                    : c.status === "VOIDED"
-                      ? "Saldo aktif"
-                      : "Total denda"}
-                </p>
-                <p className="text-xl font-semibold">
-                  {money(
-                    c.status === "DRAFT" ? c.previewAmount : c.assessedAmount
-                  )}
-                </p>
-                {c.status === "POSTED" && (
-                  <p className="text-sm text-foreground/65">
-                    Sisa {money(c.outstandingAmount)}
-                  </p>
-                )}
-              </div>
-            </article>
-          ))}
+              Daftar kejadian
+            </h2>
+            <p className="mt-1 text-sm text-foreground/75">
+              Terbaru ke terlama · Berdasarkan waktu pencatatan
+            </p>
+          </div>
+          <label className="flex items-center gap-3 text-sm">
+            <span className="whitespace-nowrap">Per halaman</span>
+            <select
+              className={selectClass.replace("w-full", "w-20")}
+              value={limit}
+              onChange={(e) => {
+                setLimit(Number(e.target.value))
+                setPage(1)
+              }}
+            >
+              {[6, 12, 24].map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
-      </LoadState>
-      <Pager result={result.data} page={page} onChange={setPage} />
+        <p
+          role="status"
+          aria-atomic="true"
+          className="text-sm text-foreground/75"
+        >
+          {result.loading
+            ? "Memuat kejadian…"
+            : result.data
+              ? result.data.meta.total === 0
+                ? "0 kejadian ditemukan"
+                : `Menampilkan ${(page - 1) * limit + 1}–${Math.min(page * limit, result.data.meta.total)} dari ${result.data.meta.total} kejadian`
+              : "Daftar belum dapat dimuat"}
+        </p>
+        <LoadState
+          loading={result.loading}
+          error={result.error}
+          retry={result.reload}
+          empty={
+            result.data?.data.length === 0
+              ? "Belum ada kejadian yang sesuai. Catat kejadian baru atau ubah filter."
+              : undefined
+          }
+          loadingView={
+            <div
+              aria-hidden="true"
+              className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+            >
+              {Array.from({ length: limit }, (_, index) => (
+                <div
+                  key={index}
+                  className="h-80 rounded-xl border bg-muted/40"
+                />
+              ))}
+            </div>
+          }
+        >
+          <ul
+            aria-label="Daftar kejadian denda"
+            className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+          >
+            {result.data?.data.map((fine) => (
+              <FineCard key={fine.id} fine={fine} />
+            ))}
+          </ul>
+        </LoadState>
+        {result.data && result.data.meta.total > 0 && (
+          <FinePagination
+            meta={result.data.meta}
+            page={page}
+            onChange={changePage}
+          />
+        )}
+      </section>
     </section>
   )
 }
