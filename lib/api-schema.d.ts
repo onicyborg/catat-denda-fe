@@ -260,6 +260,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/fine-cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["FinesController_list"];
+        put?: never;
+        post: operations["FinesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/fine-cases/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["FinesController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["FinesController_update"];
+        trace?: never;
+    };
+    "/api/v1/fine-cases/{id}/post": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["FinesController_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/fine-cases/{id}/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["FinesController_void"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -357,6 +421,104 @@ export interface components {
             category?: "PREPARATION" | "SPILL" | "CLEANLINESS" | "INVENTORY_LOG" | "ORDER" | "OTHER";
             defaultAmountPerPerson?: number;
             description?: string | null;
+        };
+        FineLedgerResponse: {
+            id: string;
+            /** @enum {string} */
+            kind: "PAYMENT" | "REVERSAL";
+            amount: number;
+            /** @enum {string|null} */
+            method: "CASH" | "TRANSFER" | "OTHER" | null;
+            effectiveAt: string;
+            createdAt: string;
+            recordedBy: string;
+            originalPaymentId: string | null;
+            note: string | null;
+        };
+        FineMemberResponse: {
+            id: string;
+            employeeId: string | null;
+            employeeNameSnapshot: string | null;
+            rawEmployeeName: string | null;
+            employeeDisplayName: string;
+            employeeIsActive: boolean | null;
+            assignedAmount: number | null;
+            netPaidAmount: string;
+            outstandingAmount: string;
+            /** @enum {string|null} */
+            settlementStatus: "UNPAID" | "PARTIAL" | "PAID" | null;
+            entries: components["schemas"]["FineLedgerResponse"][];
+        };
+        FineResponse: {
+            id: string;
+            caseNumber: number;
+            displayCode: string;
+            /** @enum {string} */
+            status: "DRAFT" | "POSTED" | "VOIDED";
+            version: number;
+            occurredAt: string | null;
+            violationTypeId: string | null;
+            violationType: components["schemas"]["ViolationResponse"] | null;
+            violationCodeSnapshot: string | null;
+            violationNameSnapshot: string | null;
+            violationCategorySnapshot: string | null;
+            defaultRateSnapshot: number | null;
+            description: string | null;
+            sourceText: string | null;
+            createdAt: string;
+            updatedAt: string;
+            createdBy: string;
+            postedAt: string | null;
+            postedBy: string | null;
+            voidedAt: string | null;
+            voidedBy: string | null;
+            voidReason: string | null;
+            currency: string;
+            previewAmount: string;
+            amountsComplete: boolean;
+            assessedAmount: string;
+            netPaidAmount: string;
+            outstandingAmount: string;
+            /** @enum {string|null} */
+            settlementStatus: "UNPAID" | "PARTIAL" | "PAID" | null;
+            hasLedgerHistory: boolean;
+            canEditFinancial: boolean;
+            canVoid: boolean;
+            members: components["schemas"]["FineMemberResponse"][];
+        };
+        FinePageEnvelope: {
+            data: components["schemas"]["FineResponse"][];
+            meta: components["schemas"]["PageMetaResponse"];
+        };
+        FineEnvelope: {
+            data: components["schemas"]["FineResponse"];
+        };
+        FineMemberDto: {
+            employeeId?: string | null;
+            rawEmployeeName?: string | null;
+            assignedAmount?: number | null;
+        };
+        FineCreateDto: {
+            occurredAt?: string | null;
+            violationTypeId?: string | null;
+            description?: string | null;
+            sourceText?: string | null;
+            members?: components["schemas"]["FineMemberDto"][];
+        };
+        FineUpdateDto: {
+            occurredAt?: string | null;
+            violationTypeId?: string | null;
+            description?: string | null;
+            sourceText?: string | null;
+            members?: components["schemas"]["FineMemberDto"][];
+            version: number;
+        };
+        FineVersionDto: {
+            version: number;
+        };
+        FineVoidDto: {
+            version: number;
+            reason: string;
         };
     };
     responses: never;
@@ -877,6 +1039,162 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ViolationEnvelope"];
+                };
+            };
+        };
+    };
+    FinesController_list: {
+        parameters: {
+            query?: {
+                q?: string;
+                status?: "DRAFT" | "POSTED" | "VOIDED";
+                employeeId?: string;
+                violationTypeId?: string;
+                from?: string;
+                to?: string;
+                page?: Record<string, never>;
+                limit?: Record<string, never>;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FinePageEnvelope"];
+                };
+            };
+        };
+    };
+    FinesController_create: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+                "X-CSRF-Token": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FineCreateDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FineEnvelope"];
+                };
+            };
+        };
+    };
+    FinesController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FineEnvelope"];
+                };
+            };
+        };
+    };
+    FinesController_update: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FineUpdateDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FineEnvelope"];
+                };
+            };
+        };
+    };
+    FinesController_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FineVersionDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FineEnvelope"];
+                };
+            };
+        };
+    };
+    FinesController_void: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FineVoidDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FineEnvelope"];
                 };
             };
         };

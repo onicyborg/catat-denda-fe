@@ -13,3 +13,7 @@ Halaman akses admin untuk pengelola usaha. Arah visual: buku pencatatan operasio
 ## Halaman master Phase2
 
 ENERGY1 / RHYTHM2 / MOTION0. Daftar dipisahkan garis seperti register operasional; tidak memakai statistik hias. Sidebar desktop memisahkan navigasi dari data, sedangkan tombol Menu membuka dialog navigasi pada ponsel. Form create/edit berada pada dialog preset Base UI; konfirmasi arsip menjelaskan efek pada pilihan aktif dan histori. Teks sekunder foreground/65, input/select jelas dan target sentuh minimal44px. Aksi penting tetap terlihat tanpa tabel horizontal pada layar kecil. Tidak ada tautan ke modul yang belum tersedia.
+
+## Halaman kejadian Phase3
+
+Register dan form administrasi untuk pengelola usaha; ENERGY1 / RHYTHM2 / MOTION0. Daftar menggunakan garis pemisah dan informasi status nyata. Form memisahkan kejadian, deskripsi dan alokasi per orang; total menjadi titik fokus kedua setelah judul. Biru untuk aksi posting serta tautan kejadian. Preset, Raleway, Base UI, tema dan radius tetap mengikuti fondasi yang ada. Tidak ada ilustrasi tambahan atau angka hias. Pada ponsel setiap alokasi ditumpuk menjadi nama, nominal dan aksi agar tidak membutuhkan scroll horizontal. Filter master memakai dialog berpencarian/paging, tidak mengunduh seluruh data. Focus, pending, draft belum lengkap, konflik dan koneksi gagal mempunyai state eksplisit; tidak menambah animasi untuk tugas pencatatan.

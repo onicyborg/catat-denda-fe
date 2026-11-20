@@ -18,6 +18,7 @@ export default function Protected({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const links = [
     { href: "/dashboard", label: "Ringkasan" },
+    { href: "/fines", label: "Kejadian denda" },
     { href: "/employees", label: "Karyawan" },
     { href: "/mistake-types", label: "Jenis kesalahan" },
     { href: "/settings", label: "Akun" },

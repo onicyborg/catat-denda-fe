@@ -12,6 +12,15 @@ export default function Dashboard() {
       <div className="divide-y rounded-xl border bg-background">
         <Link
           className="block space-y-2 p-6 hover:bg-muted/40 focus-visible:outline-2"
+          href="/fines"
+        >
+          <h2 className="text-lg font-semibold">Catat dan tinjau kejadian</h2>
+          <p className="text-sm text-foreground/65">
+            Draft, posting, alokasi per peserta, dan koreksi histori.
+          </p>
+        </Link>
+        <Link
+          className="block space-y-2 p-6 hover:bg-muted/40 focus-visible:outline-2"
           href="/employees"
         >
           <h2 className="text-lg font-semibold">Kelola karyawan</h2>
