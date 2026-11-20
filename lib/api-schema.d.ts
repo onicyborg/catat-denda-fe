@@ -105,7 +105,13 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         LoginDto: {
-            email: string;
+            /** @description Username atau email akun lama. Kirim tepat satu identifier. */
+            username?: string;
+            /**
+             * @deprecated
+             * @description Kompatibilitas akun lama; gunakan username untuk login baru.
+             */
+            email?: string;
             password: string;
         };
         PasswordDto: {
@@ -142,7 +148,8 @@ export interface operations {
                     "application/json": {
                         data: {
                             id: string;
-                            email: string;
+                            email: string | null;
+                            username: string | null;
                             role?: string;
                             csrfToken: string;
                         };
@@ -168,7 +175,8 @@ export interface operations {
                     "application/json": {
                         data: {
                             id: string;
-                            email: string;
+                            email: string | null;
+                            username: string | null;
                             role?: string;
                             csrfToken: string;
                         };

@@ -10,7 +10,7 @@ export default function Settings() {
   return (
     <section className="max-w-lg space-y-6">
       <h1 className="text-2xl font-semibold">Akun admin</h1>
-      <p className="break-all">{admin.email}</p>
+      <p className="break-all">{admin.username ?? admin.email}</p>
       <p>Rupiah (IDR) · Waktu Indonesia Barat</p>
       <form
         className="space-y-4"

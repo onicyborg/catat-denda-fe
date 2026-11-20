@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test"
 const credentials = {
-  email: "browser@example.test",
+  username: "browser.admin",
   password: "QA-only-password-12345",
 }
 async function login(page: import("@playwright/test").Page) {
   await page.goto("/login")
-  await page.getByLabel("Email", { exact: true }).fill(credentials.email)
+  await page.getByLabel("Username", { exact: true }).fill(credentials.username)
   await page
     .getByLabel("Kata sandi", { exact: true })
     .fill(credentials.password)
@@ -61,7 +61,7 @@ test("desktop/mobile login, wrong password, password rotation and logout", async
   page.on("pageerror", (error) => errors.push(error.message))
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto("/login")
-  await page.getByLabel("Email", { exact: true }).fill(credentials.email)
+  await page.getByLabel("Username", { exact: true }).fill(credentials.username)
   await page
     .getByLabel("Kata sandi", { exact: true })
     .fill("incorrect-password")
@@ -69,10 +69,10 @@ test("desktop/mobile login, wrong password, password rotation and logout", async
   await expect(
     page
       .getByRole("alert")
-      .filter({ hasText: "Email atau kata sandi tidak sesuai." })
+      .filter({ hasText: "Username atau kata sandi tidak sesuai." })
   ).toBeVisible()
-  await expect(page.getByLabel("Email", { exact: true })).toHaveValue(
-    credentials.email
+  await expect(page.getByLabel("Username", { exact: true })).toHaveValue(
+    credentials.username
   )
   await page
     .getByLabel("Kata sandi", { exact: true })

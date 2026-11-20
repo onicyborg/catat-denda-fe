@@ -6,7 +6,7 @@ test("login fields tolerate keyboard events without a key", async ({
   const errors: string[] = []
   page.on("pageerror", (error) => errors.push(error.message))
   await page.goto("/login")
-  for (const label of ["Email", "Kata sandi"]) {
+  for (const label of ["Username", "Kata sandi"]) {
     const field = page.getByLabel(label, { exact: true })
     await field.click()
     await field.evaluate((element) => {
@@ -35,7 +35,7 @@ test("theme shortcut ignores typing and composition but works outside inputs", a
   const dark = await html.evaluate((element) =>
     element.classList.contains("dark")
   )
-  const field = page.getByLabel("Email", { exact: true })
+  const field = page.getByLabel("Username", { exact: true })
   await field.click()
   await field.press("d")
   await expect(field).toHaveValue("d")
