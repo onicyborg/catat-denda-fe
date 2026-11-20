@@ -172,3 +172,22 @@ test("finance animation loops, pauses and respects reduced motion without amount
     page.getByRole("button", { name: "Jeda animasi", exact: true })
   ).toBeHidden()
 })
+
+test("login starts blank and clears restored credentials", async ({ page }) => {
+  await page.goto("/login")
+  const username = page.getByLabel("Username", { exact: true }),
+    password = page.getByLabel("Kata sandi", { exact: true })
+  await expect(username).toHaveValue("")
+  await expect(password).toHaveValue("")
+  await expect(username).toHaveAttribute("autocomplete", "off")
+  await expect(password).toHaveAttribute("autocomplete", "off")
+  await username.fill("unsaved-user")
+  await password.fill("unsaved-password")
+  await page.evaluate(() =>
+    window.dispatchEvent(
+      new PageTransitionEvent("pageshow", { persisted: true })
+    )
+  )
+  await expect(username).toHaveValue("")
+  await expect(password).toHaveValue("")
+})

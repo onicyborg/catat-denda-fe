@@ -1,11 +1,46 @@
 "use client"
 import Link from "next/link"
-import { useEffect, useState, createContext, useContext } from "react"
+import { usePathname } from "next/navigation"
+import { AdminContext } from "@/components/admin-context"
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { api, type Admin } from "@/lib/api"
-const Context = createContext<Admin | null>(null)
-export const useAdmin = () => useContext(Context)!
 export default function Protected({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const links = [
+    { href: "/dashboard", label: "Ringkasan" },
+    { href: "/employees", label: "Karyawan" },
+    { href: "/mistake-types", label: "Jenis kesalahan" },
+    { href: "/settings", label: "Akun" },
+  ]
+  const navigation = (close?: () => void) => (
+    <nav aria-label="Menu utama" className="space-y-1">
+      {links.map((link) => (
+        <Link
+          key={link.href}
+          href={link.href}
+          onClick={close}
+          aria-current={
+            pathname === link.href || pathname.startsWith(link.href + "/")
+              ? "page"
+              : undefined
+          }
+          className={`flex min-h-11 items-center rounded-lg px-3 text-sm font-medium focus-visible:outline-2 ${pathname === link.href || pathname.startsWith(link.href + "/") ? "bg-primary/10 text-foreground" : "text-foreground/65 hover:bg-muted hover:text-foreground"}`}
+        >
+          {link.label}
+        </Link>
+      ))}
+    </nav>
+  )
   const [admin, setAdmin] = useState<Admin | null>(null)
   const [loggingOut, setLoggingOut] = useState(false)
   const [error, setError] = useState("")
@@ -61,46 +96,69 @@ export default function Protected({ children }: { children: React.ReactNode }) {
       </main>
     )
   return (
-    <Context value={admin}>
-      <header className="flex flex-wrap items-center justify-between gap-4 border-b p-4">
-        <Link className="font-semibold" href="/dashboard">
-          Catat Denda
-        </Link>
-        <nav
-          aria-label="Menu utama"
-          className="flex flex-wrap items-center gap-4"
-        >
-          <Link href="/dashboard">Ringkasan</Link>
-          <Link href="/settings">Akun</Link>
-          <Button
-            variant="outline"
-            disabled={loggingOut}
-            onClick={async () => {
-              setLoggingOut(true)
-              try {
-                await api("/auth/logout", {
-                  method: "POST",
-                  headers: { "X-CSRF-Token": admin.csrfToken },
-                })
-                window.dispatchEvent(new Event("session-expired"))
-                window.location.replace("/login")
-              } catch (err) {
-                setError((err as Error).message)
-              } finally {
-                setLoggingOut(false)
-              }
-            }}
+    <AdminContext value={admin}>
+      <div className="min-h-svh bg-muted/30">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b bg-background px-4 py-3 sm:px-6">
+          <Link
+            className="inline-flex min-h-11 items-center font-semibold"
+            href="/dashboard"
           >
-            {loggingOut ? "Keluar…" : "Keluar"}
-          </Button>
-        </nav>
-      </header>
-      {error && (
-        <p role="alert" className="p-4">
-          {error}
-        </p>
-      )}
-      <main className="mx-auto max-w-5xl p-6">{children}</main>
-    </Context>
+            Catat Denda
+          </Link>
+          <div className="flex items-center gap-2">
+            <Dialog open={menuOpen} onOpenChange={setMenuOpen}>
+              <DialogTrigger
+                render={
+                  <Button variant="outline" className="min-h-11 lg:hidden" />
+                }
+              >
+                Menu
+              </DialogTrigger>
+              <DialogContent className="rounded-2xl">
+                <DialogHeader>
+                  <DialogTitle>Menu</DialogTitle>
+                  <DialogDescription>Ruang kerja Catat Denda</DialogDescription>
+                </DialogHeader>
+                {navigation(() => setMenuOpen(false))}
+              </DialogContent>
+            </Dialog>
+            <Button
+              variant="outline"
+              className="min-h-11"
+              disabled={loggingOut}
+              onClick={async () => {
+                setLoggingOut(true)
+                try {
+                  await api("/auth/logout", {
+                    method: "POST",
+                    headers: { "X-CSRF-Token": admin.csrfToken },
+                  })
+                  window.dispatchEvent(new Event("session-expired"))
+                  window.location.replace("/login")
+                } catch (err) {
+                  setError((err as Error).message)
+                } finally {
+                  setLoggingOut(false)
+                }
+              }}
+            >
+              {loggingOut ? "Keluar…" : "Keluar"}
+            </Button>
+          </div>
+        </header>
+        {error && (
+          <p role="alert" className="p-4">
+            {error}
+          </p>
+        )}
+        <div className="mx-auto flex max-w-[1440px]">
+          <aside className="hidden min-h-[calc(100svh-70px)] w-56 shrink-0 border-r bg-background p-4 lg:block">
+            <p className="mb-4 px-3 text-xs text-foreground/65">Ruang kerja</p>
+            {navigation()}
+          </aside>
+          <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        </div>
+      </div>
+    </AdminContext>
   )
 }

@@ -1,7 +1,16 @@
 import type { paths } from "./api-schema"
 export type Admin =
   paths["/api/v1/auth/me"]["get"]["responses"][200]["content"]["application/json"]["data"]
-export async function api<T>(
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public fields: string[] = []
+  ) {
+    super(message)
+  }
+}
+export async function apiEnvelope<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
@@ -21,11 +30,19 @@ export async function api<T>(
       window.dispatchEvent(new Event("session-expired"))
       window.location.replace("/login")
     }
-    throw new Error(
+    throw new ApiError(
       Array.isArray(body.error?.message)
         ? body.error.message.join(". ")
-        : (body.error?.message ?? "Permintaan gagal. Silakan ulangi.")
+        : (body.error?.message ?? "Permintaan gagal. Silakan ulangi."),
+      res.status,
+      body.error?.details?.fields ?? []
     )
   }
-  return body.data
+  return body
+}
+export async function api<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  return (await apiEnvelope<{ data: T }>(path, options)).data
 }

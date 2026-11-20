@@ -1,6 +1,6 @@
 "use client"
 import { useState } from "react"
-import { useAdmin } from "../layout"
+import { useAdmin } from "@/components/admin-context"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 export default function Settings() {

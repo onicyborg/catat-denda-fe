@@ -100,6 +100,166 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/employees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["EmployeesController_list"];
+        put?: never;
+        post: operations["EmployeesController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/employees/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["EmployeesController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["EmployeesController_update"];
+        trace?: never;
+    };
+    "/api/v1/employees/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["EmployeesController_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/employees/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["EmployeesController_restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/employees/{id}/aliases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["EmployeesController_addAlias"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/employees/{id}/aliases/{aliasId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["EmployeesController_removeAlias"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/violation-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ViolationsController_list"];
+        put?: never;
+        post: operations["ViolationsController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/violation-types/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ViolationsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["ViolationsController_update"];
+        trace?: never;
+    };
+    "/api/v1/violation-types/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ViolationsController_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/violation-types/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ViolationsController_restore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -117,6 +277,86 @@ export interface components {
         PasswordDto: {
             currentPassword: string;
             newPassword: string;
+        };
+        AliasResponse: {
+            id: string;
+            aliasDisplay: string;
+        };
+        EmployeeResponse: {
+            id: string;
+            displayName: string;
+            employeeCode: string | null;
+            isActive: boolean;
+            createdAt: string;
+            updatedAt: string;
+            archivedAt: string | null;
+            aliases: components["schemas"]["AliasResponse"][];
+        };
+        PageMetaResponse: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+        };
+        EmployeesEnvelope: {
+            data: components["schemas"]["EmployeeResponse"][];
+            meta: components["schemas"]["PageMetaResponse"];
+        };
+        EmployeeEnvelope: {
+            data: components["schemas"]["EmployeeResponse"];
+        };
+        EmployeeCreateDto: {
+            displayName: string;
+            employeeCode?: string | null;
+        };
+        EmployeeUpdateDto: {
+            displayName?: string;
+            employeeCode?: string | null;
+        };
+        EmptyDto: Record<string, never>;
+        AliasDto: {
+            aliasDisplay: string;
+        };
+        AliasEnvelope: {
+            data: components["schemas"]["AliasResponse"];
+        };
+        SuccessEnvelope: {
+            data: Record<string, never>;
+        };
+        ViolationResponse: {
+            id: string;
+            code: string;
+            name: string;
+            /** @enum {string} */
+            category: "PREPARATION" | "SPILL" | "CLEANLINESS" | "INVENTORY_LOG" | "ORDER" | "OTHER";
+            description: string | null;
+            defaultAmountPerPerson: number;
+            isActive: boolean;
+            createdAt: string;
+            updatedAt: string;
+        };
+        ViolationsEnvelope: {
+            data: components["schemas"]["ViolationResponse"][];
+            meta: components["schemas"]["PageMetaResponse"];
+        };
+        ViolationEnvelope: {
+            data: components["schemas"]["ViolationResponse"];
+        };
+        ViolationCreateDto: {
+            code: string;
+            name: string;
+            /** @enum {string} */
+            category: "PREPARATION" | "SPILL" | "CLEANLINESS" | "INVENTORY_LOG" | "ORDER" | "OTHER";
+            defaultAmountPerPerson: number;
+            description?: string | null;
+        };
+        ViolationUpdateDto: {
+            code?: string;
+            name?: string;
+            /** @enum {string} */
+            category?: "PREPARATION" | "SPILL" | "CLEANLINESS" | "INVENTORY_LOG" | "ORDER" | "OTHER";
+            defaultAmountPerPerson?: number;
+            description?: string | null;
         };
     };
     responses: never;
@@ -284,6 +524,360 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    EmployeesController_list: {
+        parameters: {
+            query?: {
+                q?: string;
+                status?: "ACTIVE" | "INACTIVE" | "ALL";
+                page?: Record<string, never>;
+                limit?: Record<string, never>;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeesEnvelope"];
+                };
+            };
+        };
+    };
+    EmployeesController_create: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeCreateDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeEnvelope"];
+                };
+            };
+        };
+    };
+    EmployeesController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeEnvelope"];
+                };
+            };
+        };
+    };
+    EmployeesController_update: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeUpdateDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeEnvelope"];
+                };
+            };
+        };
+    };
+    EmployeesController_archive: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmptyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeEnvelope"];
+                };
+            };
+        };
+    };
+    EmployeesController_restore: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmptyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeEnvelope"];
+                };
+            };
+        };
+    };
+    EmployeesController_addAlias: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AliasDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AliasEnvelope"];
+                };
+            };
+        };
+    };
+    EmployeesController_removeAlias: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+                aliasId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuccessEnvelope"];
+                };
+            };
+        };
+    };
+    ViolationsController_list: {
+        parameters: {
+            query?: {
+                q?: string;
+                status?: "ACTIVE" | "INACTIVE" | "ALL";
+                page?: Record<string, never>;
+                limit?: Record<string, never>;
+                category?: "PREPARATION" | "SPILL" | "CLEANLINESS" | "INVENTORY_LOG" | "ORDER" | "OTHER";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViolationsEnvelope"];
+                };
+            };
+        };
+    };
+    ViolationsController_create: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViolationCreateDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViolationEnvelope"];
+                };
+            };
+        };
+    };
+    ViolationsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViolationEnvelope"];
+                };
+            };
+        };
+    };
+    ViolationsController_update: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ViolationUpdateDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViolationEnvelope"];
+                };
+            };
+        };
+    };
+    ViolationsController_archive: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmptyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViolationEnvelope"];
+                };
+            };
+        };
+    };
+    ViolationsController_restore: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmptyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ViolationEnvelope"];
+                };
             };
         };
     };

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   RiFileList3Line,
@@ -16,6 +16,16 @@ import { FinanceAnimation } from "@/components/finance-animation"
 import { api } from "@/lib/api"
 
 export default function Login() {
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
+  useEffect(() => {
+    const clear = () => {
+      setUsername("")
+      setPassword("")
+    }
+    window.addEventListener("pageshow", clear)
+    return () => window.removeEventListener("pageshow", clear)
+  }, [])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
   const [visible, setVisible] = useState(false)
@@ -100,18 +110,20 @@ export default function Login() {
             </div>
             <form
               className="space-y-5"
+              autoComplete="off"
               aria-busy={busy}
               onSubmit={async (e) => {
                 e.preventDefault()
                 if (busy) return
                 setError("")
                 setBusy(true)
-                const form = new FormData(e.currentTarget)
                 try {
                   await api("/auth/login", {
                     method: "POST",
-                    body: JSON.stringify(Object.fromEntries(form)),
+                    body: JSON.stringify({ username, password }),
                   })
+                  setUsername("")
+                  setPassword("")
                   router.replace("/dashboard")
                 } catch (err) {
                   setError((err as Error).message)
@@ -127,7 +139,9 @@ export default function Login() {
                 <Input
                   id="username"
                   name="username"
-                  autoComplete="username"
+                  autoComplete="off"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   autoCapitalize="none"
                   spellCheck={false}
                   maxLength={254}
@@ -146,7 +160,9 @@ export default function Login() {
                     id="password"
                     name="password"
                     type={visible ? "text" : "password"}
-                    autoComplete="current-password"
+                    autoComplete="off"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     maxLength={256}
                     required
                     placeholder="Masukkan kata sandi"

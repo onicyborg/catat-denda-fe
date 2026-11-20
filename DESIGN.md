@@ -9,3 +9,7 @@ Halaman akses admin untuk pengelola usaha. Arah visual: buku pencatatan operasio
 - Biru menekankan aksi masuk serta aksen dompet/koin. Teks accent gelap memakai foreground agar kontras tetap terbaca. Teks sekunder foreground/65 dan batas field eksplisit memperjelas form; bukan perubahan palet global.
 - Form menggunakan label, autoComplete, focus, pesan error, pending state dan tombol tema/password dengan accessible name. Tidak ada tautan bantuan/reset ke fitur yang belum tersedia.
 - Halaman tidak menampilkan credential bawaan. Provisioning akun dilakukan terpisah di backend.
+
+## Halaman master Phase2
+
+ENERGY1 / RHYTHM2 / MOTION0. Daftar dipisahkan garis seperti register operasional; tidak memakai statistik hias. Sidebar desktop memisahkan navigasi dari data, sedangkan tombol Menu membuka dialog navigasi pada ponsel. Form create/edit berada pada dialog preset Base UI; konfirmasi arsip menjelaskan efek pada pilihan aktif dan histori. Teks sekunder foreground/65, input/select jelas dan target sentuh minimal44px. Aksi penting tetap terlihat tanpa tabel horizontal pada layar kecil. Tidak ada tautan ke modul yang belum tersedia.

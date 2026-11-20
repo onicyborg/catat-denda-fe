@@ -11,6 +11,11 @@ async function login(page: import("@playwright/test").Page) {
     .fill(credentials.password)
   await page.getByRole("button", { name: "Masuk", exact: true }).click()
   await expect(page).toHaveURL(/dashboard$/)
+  await expect(
+    page.getByRole("button", { name: "Keluar", exact: true })
+  ).toBeVisible()
+  const menu = page.getByRole("button", { name: "Menu", exact: true })
+  if (await menu.isVisible()) await menu.click()
   await page.getByRole("link", { name: "Akun", exact: true }).click()
   await expect(page.getByRole("heading", { name: "Akun admin" })).toBeVisible()
 }
@@ -79,6 +84,11 @@ test("desktop/mobile login, wrong password, password rotation and logout", async
     .fill(credentials.password)
   await page.getByRole("button", { name: "Masuk", exact: true }).click()
   await expect(page).toHaveURL(/dashboard$/)
+  await expect(
+    page.getByRole("button", { name: "Keluar", exact: true })
+  ).toBeVisible()
+  const menu = page.getByRole("button", { name: "Menu", exact: true })
+  if (await menu.isVisible()) await menu.click()
   await page.getByRole("link", { name: "Akun", exact: true }).click()
   const other = await browser.newContext({ baseURL: "http://localhost:3100" })
   try {
