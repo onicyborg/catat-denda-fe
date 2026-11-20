@@ -1,5 +1,7 @@
 "use client"
 import Link from "next/link"
+import { Suspense } from "react"
+import { EmployeeFinance } from "@/components/reporting/employee-finance"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -178,6 +180,9 @@ export function EmployeeDetail({ id }: { id: string }) {
                 <Feedback error={error} />
               </form>
             </section>
+            <Suspense fallback={<p role="status">Memuat saldo dan histori…</p>}>
+              <EmployeeFinance id={id} />
+            </Suspense>
           </>
         )}
       </LoadState>

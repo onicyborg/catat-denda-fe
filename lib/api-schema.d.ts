@@ -388,6 +388,166 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/reports/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ReportsController_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/employee-balances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ReportsController_balances"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/fine-cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ReportsController_cases"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/fine-cases.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ReportsController_exportCases"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/payments.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ReportsController_exportPayments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/dashboard/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["DashboardController_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/employees/{id}/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["EmployeeSummaryController_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["SettingsController_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["SettingsController_update"];
+        trace?: never;
+    };
+    "/api/v1/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AuditController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/audit-logs/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["AuditController_options"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -627,6 +787,122 @@ export interface components {
             /** Format: date-time */
             effectiveAt: string;
             note?: string | null;
+        };
+        ReportSummaryResponse: {
+            exportMaxDays: number;
+            exportMaxRows: number;
+            businessName: string;
+            from: string;
+            to: string;
+            timezone: string;
+            currency: string;
+            generatedAt: string;
+            employeeId: string | null;
+            violationTypeId: string | null;
+            caseCount: string;
+            allocationCount: string;
+            assessedAmount: string;
+            cohortNetPaidAmount: string;
+            cohortOutstandingAmount: string;
+            periodNetPaidAmount: string;
+            currentOutstandingAmount: string;
+        };
+        SummaryEnvelope: {
+            data: components["schemas"]["ReportSummaryResponse"];
+        };
+        BalanceResponse: {
+            employeeId: string;
+            employeeName: string;
+            employeeCode: string | null;
+            isActive: boolean;
+            caseCount: string;
+            allocationCount: string;
+            assessedAmount: string;
+            netPaidAmount: string;
+            outstandingAmount: string;
+        };
+        BalanceEnvelope: {
+            data: components["schemas"]["BalanceResponse"][];
+            meta: components["schemas"]["PageMetaResponse"];
+        };
+        CaseReportResponse: {
+            id: string;
+            caseCode: string;
+            caseNumber: number;
+            /** @enum {string} */
+            status: "DRAFT" | "POSTED" | "VOIDED";
+            occurredAt: string | null;
+            description: string | null;
+            violationName: string | null;
+            allocationCount: string;
+            unknownAmountCount: string;
+            previewAmount: string;
+            assessedAmount: string;
+            netPaidAmount: string;
+            outstandingAmount: string;
+        };
+        CaseReportEnvelope: {
+            data: components["schemas"]["CaseReportResponse"][];
+            meta: components["schemas"]["PageMetaResponse"];
+        };
+        DashboardResponse: {
+            summary: components["schemas"]["ReportSummaryResponse"];
+            recentCases: components["schemas"]["CaseReportResponse"][];
+            drafts: components["schemas"]["CaseReportResponse"][];
+            draftCount: string;
+            topOutstanding: components["schemas"]["BalanceResponse"][];
+        };
+        DashboardEnvelope: {
+            data: components["schemas"]["DashboardResponse"];
+        };
+        SettingsResponse: {
+            businessName: string;
+            finePolicyReference: string | null;
+            version: number;
+            currency: string;
+            timezone: string;
+            updatedAt: string | null;
+            updatedBy: string | null;
+        };
+        SettingsEnvelope: {
+            data: components["schemas"]["SettingsResponse"];
+        };
+        SettingsDto: {
+            version: number;
+            businessName?: string;
+            finePolicyReference?: string | null;
+        };
+        AuditResponse: {
+            id: string;
+            actorUserId: string;
+            actorName: string;
+            action: string;
+            entityType: string;
+            entityId: string;
+            createdAt: string;
+            requestId: string | null;
+            beforeJson: {
+                [key: string]: unknown;
+            } | null;
+            afterJson: {
+                [key: string]: unknown;
+            } | null;
+        };
+        AuditEnvelope: {
+            data: components["schemas"]["AuditResponse"][];
+            meta: components["schemas"]["PageMetaResponse"];
+        };
+        ActorResponse: {
+            id: string;
+            name: string;
+        };
+        AuditOptionsResponse: {
+            actors: components["schemas"]["ActorResponse"][];
+            actions: string[];
+            entityTypes: string[];
+        };
+        AuditOptionsEnvelope: {
+            data: components["schemas"]["AuditOptionsResponse"];
         };
     };
     responses: never;
@@ -1407,6 +1683,277 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaymentEnvelope"];
+                };
+            };
+        };
+    };
+    ReportsController_summary: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                employeeId?: string;
+                violationTypeId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryEnvelope"];
+                };
+            };
+        };
+    };
+    ReportsController_balances: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                employeeId?: string;
+                violationTypeId?: string;
+                page?: Record<string, never>;
+                limit?: Record<string, never>;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BalanceEnvelope"];
+                };
+            };
+        };
+    };
+    ReportsController_cases: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                employeeId?: string;
+                violationTypeId?: string;
+                page?: Record<string, never>;
+                limit?: Record<string, never>;
+                status?: "POSTED" | "DRAFT" | "VOIDED" | "ALL";
+                includeUndated?: Record<string, never>;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseReportEnvelope"];
+                };
+            };
+        };
+    };
+    ReportsController_exportCases: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                employeeId?: string;
+                violationTypeId?: string;
+                page?: Record<string, never>;
+                limit?: Record<string, never>;
+                status?: "POSTED" | "DRAFT" | "VOIDED" | "ALL";
+                includeUndated?: Record<string, never>;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    ReportsController_exportPayments: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                employeeId?: string;
+                violationTypeId?: string;
+                kind?: "PAYMENT" | "REVERSAL";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    DashboardController_summary: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                employeeId?: string;
+                violationTypeId?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardEnvelope"];
+                };
+            };
+        };
+    };
+    EmployeeSummaryController_summary: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                employeeId?: string;
+                violationTypeId?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryEnvelope"];
+                };
+            };
+        };
+    };
+    SettingsController_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsEnvelope"];
+                };
+            };
+        };
+    };
+    SettingsController_update: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRF-Token": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SettingsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettingsEnvelope"];
+                };
+            };
+        };
+    };
+    AuditController_list: {
+        parameters: {
+            query?: {
+                from?: string;
+                to?: string;
+                actorUserId?: string;
+                action?: string;
+                entityType?: string;
+                page?: Record<string, never>;
+                limit?: Record<string, never>;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEnvelope"];
+                };
+            };
+        };
+    };
+    AuditController_options: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditOptionsEnvelope"];
                 };
             };
         };

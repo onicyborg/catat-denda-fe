@@ -46,3 +46,17 @@ Key/payload transaksi tertunda disimpan pada state dialog selama halaman masih t
 tests/zz-payments.spec.ts menguji UAT parsial/penuh/reversal/void, dua form concurrent, respons pembayaran/reversal terputus dan retry setelah dialog dibuka ulang, metadata, paging21 entry, filter tanggal efektif, empty/error recovery, keyboard/focus, kontras terang/gelap dan overflow halaman/dialog pada320px. Dialog menggunakan tanggal berpresisi menit secara default, mempertahankan presisi asli bila diperlukan agar reversal tidak mendahului pembayaran.
 
 Kontrak Phase4 kompatibel dengan backend commit `375bbe4`. SHA-256 openapi.json kedua repo: `48c03a6d6f484a2e11315cc9c653ae11eda924a0a7ace2929f8ada3567b6186e`. Artifact ini menghasilkan lib/api-schema.d.ts; tidak ada import source lintas repo.
+
+## Phase5: dashboard, laporan, audit dan pengaturan
+
+Dashboard kini memakai `/dashboard/summary`: jumlah case/nominal menurut tanggal kejadian, pembayaran bersih menurut tanggal efektif, serta sisa seluruh POSTED saat ini lintas periode. List terbaru, draft dan karyawan sisa terbesar berasal dari backend. Filter karyawan/jenis berlaku pada seluruh ukuran terkait. Label tidak mengurangkan cashflow periode dari nominal periode untuk mengarang saldo.
+
+`/reports` menyediakan rekap kohort per karyawan (case occurredAt periode, pembayaran kumulatif hingga kini), daftar kejadian dan CSV. Metrik tetap POSTED; status/undated hanya untuk daftar/CSV case. Hanya alokasi karyawan terpilih yang dijumlahkan. CSV mengikuti filter applied pada URL; download memakai fetch same-origin/no-store, memeriksa error dan content-type sebelum blob, memakai filename aman server. Batas aktual hari/baris ditampilkan dari metadata API. Hasil kosong mendapat header-only CSV, terlalu besar menampilkan422 tanpa menghapus filter. Pembayaran CSV mengikuti effectiveAt dan opsi kind; original/reversal tetap tersimpan walau case VOIDED.
+
+Filter laporan/dashboard/profil finansial memakai URL from/to, employeeId, violationTypeId dan page terkait; reports menambah status, includeUndated, kind, casePage dan balancePage. Reload/bookmark mempertahankan filter. Tombol Segarkan mengambil saldo server terkini. Profil `/employees/[id]` sekarang menampilkan summary, kejadian kohort dan ledger efektif dengan paging; fitur alias/profil lama tetap ada.
+
+`/audit-logs` read-only, filter waktu pencatatan WIB/aktor/aksi/entitas dan paging. Detail before/after dirender sebagai teks React pada pre-wrap, bukan HTML. Payload tampilan dibatasi/diwhitelist backend; tidak ada edit/delete audit atau credential. `/settings` menambahkan nama usaha dan referensi kebijakan, tetap memakai form change-password yang ada. Konflik versi mempertahankan input; reload pengaturan terbaru hanya atas aksi pengguna. Nama usaha memperbarui header dan metadata laporan; IDR/Asia/Jakarta tetap. GET settings tanpa row memakai fallback, tanpa provisioning/seed tersembunyi.
+
+Semua route P0 tersedia. tests/zzz-reporting.spec.ts menambah4 skenario: cohort-cashflow lintas bulan dan filter employee/CSV/profil; dashboard retry/responsive/dark; audit filter/paging/payload; settings konflik dua tab, nama150 karakter dan brand. Seluruh suite27 test juga memeriksa regresi auth/master/fine/payment sebelumnya. Build App Router memakai Suspense untuk client query-string hooks sesuai dokumentasi Next yang terpasang.
+
+Kontrak Phase5 kompatibel dengan backend commit `1be7466`. SHA-256 openapi.json: `cc5d7ff3b5a0cd953bd8f7bccd5c9cc4c6cc8cb4e806f86e6682bda75aea5cac`. Types dibuat dengan api:generate; kedua repo tetap mandiri.

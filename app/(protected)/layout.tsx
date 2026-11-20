@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import { BusinessBrand } from "@/components/reporting/business-settings"
 import { usePathname } from "next/navigation"
 import { AdminContext } from "@/components/admin-context"
 import {
@@ -22,6 +23,8 @@ export default function Protected({ children }: { children: React.ReactNode }) {
     { href: "/payments", label: "Pembayaran" },
     { href: "/employees", label: "Karyawan" },
     { href: "/mistake-types", label: "Jenis kesalahan" },
+    { label: "Laporan", href: "/reports" },
+    { label: "Audit log", href: "/audit-logs" },
     { href: "/settings", label: "Akun" },
   ]
   const navigation = (close?: () => void) => (
@@ -101,12 +104,7 @@ export default function Protected({ children }: { children: React.ReactNode }) {
     <AdminContext value={admin}>
       <div className="min-h-svh bg-muted/30">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b bg-background px-4 py-3 sm:px-6">
-          <Link
-            className="inline-flex min-h-11 items-center font-semibold"
-            href="/dashboard"
-          >
-            Catat Denda
-          </Link>
+          <BusinessBrand />
           <div className="flex items-center gap-2">
             <Dialog open={menuOpen} onOpenChange={setMenuOpen}>
               <DialogTrigger

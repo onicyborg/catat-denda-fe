@@ -1,17 +1,23 @@
 "use client"
+import { BusinessSettings } from "@/components/reporting/business-settings"
 import { useState } from "react"
 import { useAdmin } from "@/components/admin-context"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
+import { fieldClass } from "@/components/master/shared"
 export default function Settings() {
   const admin = useAdmin()
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState("")
   return (
-    <section className="max-w-lg space-y-6">
-      <h1 className="text-2xl font-semibold">Akun admin</h1>
-      <p className="break-all">{admin.username ?? admin.email}</p>
-      <p>Rupiah (IDR) · Waktu Indonesia Barat</p>
+    <section className="max-w-3xl space-y-6">
+      <h1 className="text-3xl font-semibold">Pengaturan</h1>
+      <BusinessSettings />
+      <div className="space-y-3">
+        <h2 className="text-2xl font-semibold">Akun admin</h2>
+        <p className="break-all">{admin.username ?? admin.email}</p>
+        <p>Rupiah (IDR) · Waktu Indonesia Barat</p>
+      </div>
       <form
         className="space-y-4"
         onSubmit={async (e) => {
@@ -38,7 +44,7 @@ export default function Settings() {
         <label className="block space-y-2">
           Kata sandi lama
           <input
-            className="block w-full rounded-md border p-3 focus-visible:outline-2"
+            className={`${fieldClass} block w-full border px-3 focus-visible:outline-2`}
             type="password"
             name="currentPassword"
             autoComplete="current-password"
@@ -49,7 +55,7 @@ export default function Settings() {
         <label className="block space-y-2">
           Kata sandi baru (minimal 12 karakter)
           <input
-            className="block w-full rounded-md border p-3 focus-visible:outline-2"
+            className={`${fieldClass} block w-full border px-3 focus-visible:outline-2`}
             type="password"
             name="newPassword"
             autoComplete="new-password"
