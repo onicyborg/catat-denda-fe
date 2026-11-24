@@ -12,7 +12,6 @@ import {
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { FinanceAnimation } from "@/components/finance-animation"
 import { api } from "@/lib/api"
 import credentialStyles from "./credentials.module.css"
 
@@ -64,8 +63,8 @@ export default function Login() {
   const { resolvedTheme, setTheme } = useTheme()
   const router = useRouter()
   return (
-    <main className="flex min-h-svh flex-col bg-muted/40 p-4 sm:p-8 lg:justify-center lg:p-12">
-      <div className="mx-auto w-full max-w-6xl">
+    <main className="flex min-h-svh flex-col justify-center bg-muted/40 p-4 sm:p-8 lg:p-12">
+      <div className="mx-auto w-full max-w-md">
         <header className="mb-5 flex items-center justify-between gap-4 lg:mb-8">
           <div className="flex items-center gap-3">
             <span className="flex size-10 items-center justify-center rounded-xl border bg-background text-primary dark:text-foreground">
@@ -95,49 +94,23 @@ export default function Login() {
             />
           </Button>
         </header>
-        <div className="grid rounded-2xl border bg-background lg:min-h-[620px] lg:grid-cols-[1.08fr_1fr]">
+        <div className="rounded-2xl border bg-background">
           <section
-            className="relative rounded-t-2xl border-b bg-muted/40 px-6 py-7 sm:px-10 lg:flex lg:flex-col lg:justify-between lg:rounded-l-2xl lg:rounded-tr-none lg:border-r lg:border-b-0 lg:p-12"
-            aria-labelledby="intro-title"
-          >
-            <div>
-              <p className="mb-4 hidden items-center gap-2 text-sm text-foreground/65 lg:flex">
-                <span className="h-px w-6 bg-primary" />
-                Pencatatan denda karyawan
-              </p>
-              <h2
-                id="intro-title"
-                className="text-2xl leading-tight font-semibold tracking-tight sm:text-3xl lg:text-[2.5rem]"
-              >
-                Dari kejadian,
-                <br className="hidden lg:block" /> hingga penyelesaian.
-              </h2>
-              <p className="mt-4 hidden max-w-sm text-sm leading-relaxed text-foreground/65 sm:block">
-                Ruang kerja pengelola untuk mencatat kejadian dan menjaga
-                riwayat operasional tetap tertata.
-              </p>
-            </div>
-            <FinanceAnimation />
-            <p className="mt-8 hidden text-xs text-foreground/65 lg:block">
-              Catatan tertata, pekerjaan lebih tenang.
-            </p>
-          </section>
-          <section
-            className="flex flex-col justify-center px-6 py-7 sm:px-10 sm:py-9 lg:px-14 lg:py-12"
+            className="flex flex-col justify-center px-5 py-7 sm:px-8 sm:py-9"
             aria-labelledby="login-title"
           >
             <div className="mb-8">
               <p className="mb-3 text-sm font-medium text-primary dark:text-foreground">
-                Akses pengelola
+                Selamat datang
               </p>
               <h1
                 id="login-title"
                 className="text-2xl font-semibold tracking-tight sm:text-3xl"
               >
-                Masuk sebagai admin
+                Masuk ke Catat Denda
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-foreground/65">
-                Masukkan akun Anda untuk membuka ruang kerja.
+                Masuk untuk mencatat denda dan pembayaran.
               </p>
             </div>
             <form

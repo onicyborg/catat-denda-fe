@@ -1,9 +1,15 @@
 "use client"
 import Link from "next/link"
-import { RiAddLine, RiRefreshLine } from "@remixicon/react"
+import {
+  RiAddLine,
+  RiWallet3Line,
+  RiGroupLine,
+  RiRefreshLine,
+} from "@remixicon/react"
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/workspace/page-header"
 import { LoadState, useResource } from "@/components/master/shared"
+import { Disclosure } from "@/components/workspace/disclosure"
 import { Metrics } from "./metrics"
 import { ReportFilters, useReportUrl } from "./filters"
 import { CaseRows, BalanceRows } from "./rows"
@@ -43,19 +49,20 @@ export function Dashboard() {
       <PageHeader
         eyebrow={data?.summary.businessName ?? "Ruang kerja"}
         title="Ringkasan"
-        description="Pantau kejadian, penyelesaian alokasi, dan kewajiban yang masih berjalan."
+        description="Apa yang ingin Anda lakukan hari ini?"
         actions={
           <>
             <Button
-              className="min-h-11 gap-2"
+              className="size-11 gap-2"
+              aria-label="Segarkan ringkasan"
               variant="outline"
               onClick={() => result.reload()}
             >
               <RiRefreshLine className="size-4" aria-hidden="true" />
-              Segarkan ringkasan
+              <span className="sr-only">Segarkan ringkasan</span>
             </Button>
             <Link
-              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-ring"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-ring"
               href="/fines/new"
             >
               <RiAddLine className="size-4" aria-hidden="true" />
@@ -64,6 +71,22 @@ export function Dashboard() {
           </>
         }
       />
+      <div className="grid grid-cols-2 gap-3">
+        <Link
+          href="/payments/new"
+          className="flex min-h-24 flex-col justify-center gap-2 rounded-xl border bg-background p-4 font-medium hover:bg-muted focus-visible:outline-2"
+        >
+          <RiWallet3Line aria-hidden="true" className="size-5" />
+          <span className="text-sm">Catat pembayaran</span>
+        </Link>
+        <Link
+          href="/employees"
+          className="flex min-h-24 flex-col justify-center gap-2 rounded-xl border bg-background p-4 font-medium hover:bg-muted focus-visible:outline-2"
+        >
+          <RiGroupLine aria-hidden="true" className="size-5" />
+          <span className="text-sm">Lihat denda karyawan</span>
+        </Link>
+      </div>
       <ReportFilters key={url.key} values={url.values} onApply={url.update} />
       <LoadState
         loading={result.loading}
@@ -74,18 +97,9 @@ export function Dashboard() {
         {data && (
           <>
             <Metrics data={data.summary} />
-            <div className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-              <SettlementChart
-                data={data.summary}
-                reportHref={"/reports?" + url.base}
-              />
-              <OutstandingChart rows={data.topOutstanding} />
-            </div>
             <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
               <section className="min-w-0 space-y-4 rounded-xl border bg-background p-5 sm:p-6">
-                <h2 className="text-base font-semibold">
-                  Kejadian terbaru menurut tanggal
-                </h2>
+                <h2 className="text-base font-semibold">Denda terbaru</h2>
                 <p className="text-xs leading-5 text-foreground/65">
                   Semua periode; maksimal lima kejadian sesuai filter karyawan
                   dan jenis.
@@ -94,16 +108,16 @@ export function Dashboard() {
                   <CaseRows rows={data.recentCases} compact />
                 ) : (
                   <p className="rounded-lg bg-muted/40 p-5 text-sm text-foreground/65">
-                    Belum ada kejadian diposting.
+                    Belum ada denda aktif pada periode ini.
                   </p>
                 )}
               </section>
               <section className="min-w-0 space-y-4 rounded-xl border bg-background p-5 sm:p-6">
                 <h2 className="text-base font-semibold">
-                  Draft perlu ditinjau ({data.draftCount})
+                  Draft belum selesai ({data.draftCount})
                 </h2>
                 <p className="text-xs leading-5 text-foreground/65">
-                  Lanjutkan melengkapi pencatatan sebelum diposting.
+                  Lengkapi draft agar denda bisa diaktifkan.
                 </p>
                 {data.drafts.length ? (
                   <CaseRows rows={data.drafts} compact />
@@ -114,6 +128,19 @@ export function Dashboard() {
                 )}
               </section>
             </div>
+            <Disclosure
+              title="Grafik penyelesaian"
+              summary="Lihat perbandingan pembayaran dan sisa denda"
+            >
+              {" "}
+              <div className="grid items-stretch gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+                <SettlementChart
+                  data={data.summary}
+                  reportHref={"/reports?" + url.base}
+                />
+                <OutstandingChart rows={data.topOutstanding} />
+              </div>
+            </Disclosure>
             {data.topOutstanding.length > 0 && (
               <details className="rounded-xl border bg-background p-5">
                 <summary className="min-h-11 cursor-pointer content-center text-sm font-medium">

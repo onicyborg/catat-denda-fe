@@ -62,7 +62,7 @@ export function FineDetail({ id }: { id: string }) {
                 <p className="mb-2 text-sm text-foreground/65">
                   Kejadian · {caseLabels[c.status]} · Versi {c.version}
                 </p>
-                <h1 className="text-3xl font-semibold">{c.displayCode}</h1>
+                <h1 className="text-2xl font-semibold">{c.displayCode}</h1>
                 <p className="mt-3 text-sm text-foreground/65">
                   {wib(c.occurredAt)}
                 </p>
@@ -121,9 +121,9 @@ export function FineDetail({ id }: { id: string }) {
                   </p>
                   {c.status === "DRAFT" && (
                     <p className="text-sm text-foreground/65">
-                      Draft belum menambah saldo. Posting memerlukan tanggal,
-                      jenis dan karyawan aktif, deskripsi, serta nominal
-                      lengkap.
+                      Draft belum menjadi tagihan. Untuk mengaktifkannya,
+                      lengkapi tanggal, jenis dan karyawan aktif, deskripsi,
+                      serta nominal lengkap.
                     </p>
                   )}
                   {c.status === "VOIDED" && (
@@ -192,7 +192,7 @@ export function FineDetail({ id }: { id: string }) {
                           {m.entries.length > 0 && (
                             <details className="text-sm">
                               <summary className="cursor-pointer py-3 focus-visible:outline-2">
-                                Histori ledger ({m.entries.length})
+                                Riwayat pembayaran ({m.entries.length})
                               </summary>
                               <div className="divide-y">
                                 {m.entries.map((entry) => (
@@ -286,14 +286,12 @@ export function FineDetail({ id }: { id: string }) {
                     </div>
                     <div>
                       <dt className="text-xs text-foreground/65">
-                        Dibayar bersih
+                        Sudah dibayar
                       </dt>
                       <dd className="mt-2 text-xl">{money(c.netPaidAmount)}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-foreground/65">
-                        Sisa denda aktif
-                      </dt>
+                      <dt className="text-xs text-foreground/65">Sisa denda</dt>
                       <dd className="mt-2 text-xl">
                         {money(c.outstandingAmount)}
                       </dd>
@@ -326,7 +324,7 @@ export function FineDetail({ id }: { id: string }) {
                   {c.voidedAt && <p>Dibatalkan {wib(c.voidedAt)}</p>}
                   {c.hasLedgerHistory && (
                     <p>
-                      Histori ledger tersedia. Koreksi finansial dikunci
+                      Riwayat pembayaran tersedia. Koreksi finansial dikunci
                       meskipun pembayaran sudah dibalik.
                     </p>
                   )}
@@ -355,7 +353,7 @@ export function FineDetail({ id }: { id: string }) {
                           }
                         }}
                       >
-                        {busy ? "Memproses…" : "Posting draft"}
+                        {busy ? "Memproses…" : "Aktifkan denda"}
                       </Button>
                     )}
                     <VoidAction

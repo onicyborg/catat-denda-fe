@@ -1,3 +1,5 @@
+import { openPanel } from "./helpers/disclosure"
+import { revealControl } from "./helpers/disclosure"
 import { test, expect, type Page } from "@playwright/test"
 import { contrastFailures } from "./helpers/contrast"
 test.use({ storageState: "/tmp/catat-denda-master-qa-session.json" })
@@ -73,6 +75,9 @@ test("partial/full payment, metadata, reversals, history filters and void from U
   page.on("pageerror", (e) => errors.push(e.message))
   const { fine, employee } = await fixture(page, "FLOW")
   await page.setViewportSize({ width: 1440, height: 1000 })
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  )
   await page.goto("/fines/" + fine.id)
   const trigger = page.getByRole("button", {
     name: "Catat pembayaran",
@@ -94,6 +99,7 @@ test("partial/full payment, metadata, reversals, history filters and void from U
   await dialog.getByLabel("Nominal pembayaran (Rp)").fill("2000")
   await expect(dialog.getByRole("status")).toContainText(/Rp\s?3\.000/)
   await dialog.getByLabel("Tanggal pembayaran (WIB)").fill("2026-01-02T08:30")
+  await openPanel(page, "Tambah catatan")
   await dialog
     .getByLabel("Catatan pembayaran (opsional)")
     .fill("Pembayaran pertama QA")
@@ -104,6 +110,9 @@ test("partial/full payment, metadata, reversals, history filters and void from U
   })
   await noOverflow(page)
   await page.setViewportSize({ width: 320, height: 850 })
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  )
   await noOverflow(page)
   await page.screenshot({
     path: "/tmp/catat-denda-phase4-payment-mobile.png",
@@ -128,6 +137,7 @@ test("partial/full payment, metadata, reversals, history filters and void from U
   await dialog.getByLabel("Nominal pembayaran (Rp)").fill("3000")
   await dialog.getByLabel("Metode pembayaran").selectOption("TRANSFER")
   await dialog.getByLabel("Tanggal pembayaran (WIB)").fill("2026-01-02T09:30")
+  await openPanel(page, "Tambah catatan")
   await dialog
     .getByLabel("Catatan pembayaran (opsional)")
     .fill("Pembayaran kedua QA")
@@ -142,7 +152,7 @@ test("partial/full payment, metadata, reversals, history filters and void from U
   await expect(
     page.getByRole("button", { name: "Batalkan kejadian", exact: true })
   ).toBeDisabled()
-  await page.getByText("Histori ledger (2)", { exact: true }).click()
+  await page.getByText("Riwayat pembayaran (2)", { exact: true }).click()
   await page
     .getByRole("link", { name: "Detail transaksi", exact: true })
     .first()
@@ -188,12 +198,14 @@ test("partial/full payment, metadata, reversals, history filters and void from U
     page.getByText("Pembayaran pertama keliru", { exact: true })
   ).toBeVisible()
   await page.goto("/payments")
+  await openPanel(page, "Filter pembayaran")
   await page.getByRole("button", { name: "Filter karyawan" }).click()
   dialog = page.getByRole("dialog")
   await dialog.getByLabel("Cari pilihan").fill(employee.displayName)
   await dialog
     .getByRole("button", { name: new RegExp(employee.displayName) })
     .click()
+  await revealControl(page, "Jenis transaksi")
   await page.getByLabel("Jenis transaksi").selectOption("PAYMENT")
   await page.getByRole("button", { name: "Terapkan filter" }).click()
   const second = page
@@ -209,6 +221,7 @@ test("partial/full payment, metadata, reversals, history filters and void from U
   await page
     .getByRole("button", { name: "Batalkan kejadian", exact: true })
     .click()
+  await revealControl(page, "Alasan pembatalan")
   await page
     .getByLabel("Alasan pembatalan")
     .fill("Seluruh pembayaran telah dibalik")
@@ -217,8 +230,12 @@ test("partial/full payment, metadata, reversals, history filters and void from U
     page.getByText("Alasan pembatalan: Seluruh pembayaran telah dibalik")
   ).toBeVisible()
   await page.goto("/payments")
+  await openPanel(page, "Filter pembayaran")
+  await revealControl(page, "Dari tanggal efektif (WIB)")
   await page.getByLabel("Dari tanggal efektif (WIB)").fill("2026-01-03")
+  await revealControl(page, "Sampai tanggal efektif (WIB)")
   await page.getByLabel("Sampai tanggal efektif (WIB)").fill("2026-01-04")
+  await revealControl(page, "Jenis transaksi")
   await page.getByLabel("Jenis transaksi").selectOption("REVERSAL")
   await page.getByRole("button", { name: "Terapkan filter" }).click()
   await expect(page.locator("article")).toHaveCount(2)
@@ -369,6 +386,7 @@ test("payment ledger pagination, effective-date filters, empty/error recovery, d
     else await route.continue()
   })
   await page.goto("/payments")
+  await openPanel(page, "Filter pembayaran")
   await expect(
     page.getByRole("alert").filter({ hasText: "Layanan" })
   ).toBeVisible()
@@ -388,6 +406,7 @@ test("payment ledger pagination, effective-date filters, empty/error recovery, d
   await expect(page.locator("article")).toHaveCount(1)
   await page.getByRole("button", { name: "Sebelumnya", exact: true }).click()
   await expect(page.locator("article")).toHaveCount(20)
+  await revealControl(page, "Sampai tanggal efektif (WIB)")
   await page.getByLabel("Sampai tanggal efektif (WIB)").fill("2026-01-01")
   await page.getByRole("button", { name: "Terapkan filter" }).click()
   await expect(
@@ -401,6 +420,10 @@ test("payment ledger pagination, effective-date filters, empty/error recovery, d
   await expect(page.locator("article").first()).toBeVisible()
   for (const width of [320, 768, 1440]) {
     await page.setViewportSize({ width, height: 950 })
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+    )
     await noOverflow(page)
   }
   expect(await contrastFailures(page)).toEqual([])

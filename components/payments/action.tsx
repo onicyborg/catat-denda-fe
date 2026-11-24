@@ -19,6 +19,7 @@ import {
   fieldClass,
   selectClass,
 } from "@/components/master/shared"
+import { Disclosure } from "@/components/workspace/disclosure"
 import { useAdmin } from "@/components/admin-context"
 import { api, ApiError } from "@/lib/api"
 import { money } from "@/lib/fines"
@@ -318,17 +319,20 @@ function LedgerForm({
           </>
         ) : (
           <>
-            <label className="block space-y-2 text-sm">
-              <span>Catatan pembayaran (opsional)</span>
-              <textarea
-                className={selectClass + " h-20 py-3"}
-                {...register("note")}
-                maxLength={1000}
-              />
-            </label>
-            <FieldError id="payment-note-error">
-              {errors.note?.message}
-            </FieldError>
+            <Disclosure title="Tambah catatan (opsional)">
+              {" "}
+              <label className="block space-y-2 text-sm">
+                <span>Catatan pembayaran (opsional)</span>
+                <textarea
+                  className={selectClass + " h-20 py-3"}
+                  {...register("note")}
+                  maxLength={1000}
+                />
+              </label>
+              <FieldError id="payment-note-error">
+                {errors.note?.message}
+              </FieldError>
+            </Disclosure>
           </>
         )}
       </fieldset>

@@ -22,7 +22,7 @@ test("login fields tolerate keyboard events without a key", async ({
   await page.evaluate(() => window.dispatchEvent(new Event("keydown")))
   expect(errors).toEqual([])
   await expect(
-    page.getByRole("heading", { name: "Masuk sebagai admin" })
+    page.getByRole("heading", { name: "Masuk ke Catat Denda" })
   ).toBeVisible()
 })
 

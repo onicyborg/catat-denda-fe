@@ -12,6 +12,7 @@ import { useAdmin } from "@/components/admin-context"
 import { api, ApiError } from "@/lib/api"
 import { localWib, isoWib, money, type Fine } from "@/lib/fines"
 import type { Employee, Violation } from "@/lib/master"
+import { Disclosure } from "@/components/workspace/disclosure"
 import { Picker } from "./picker"
 const schema = z.object({
   occurredAt: z
@@ -230,13 +231,14 @@ export function FineForm({
     const t = item as Violation
     if (t.id === getValues("violationTypeId")) return
     setType(t)
+    if (!getValues("description").trim()) setValue("description", t.name)
     setValue("violationTypeId", t.id)
     getValues("members").forEach((m, i) => {
       if (!m.manual)
         setValue(`members.${i}.amount`, String(t.defaultAmountPerPerson))
     })
     setNotice(
-      "Tarif jenis baru diterapkan pada nominal yang belum Anda ubah. Override manual tetap dipertahankan."
+      "Tarif jenis baru diterapkan ke karyawan yang dipilih. Nominal yang Anda ubah sendiri tetap digunakan."
     )
   }
   return (
@@ -257,7 +259,7 @@ export function FineForm({
           >
             {saved.displayCode}
           </Link>
-          . Retry menggunakan draft ini.
+          . Silakan lanjutkan dari draft ini.
         </p>
       )}
       {Object.keys(errors).length > 0 && (
@@ -272,23 +274,15 @@ export function FineForm({
       >
         {!locked && (
           <div className="space-y-5 rounded-xl border bg-background p-4 sm:p-6">
-            <h2 className="text-lg font-semibold">Kejadian</h2>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <label className="space-y-2 text-sm">
-                <span>Tanggal dan waktu (WIB)</span>
-                <Input
-                  type="datetime-local"
-                  className={fieldClass + " w-full min-w-0"}
-                  {...register("occurredAt")}
-                />
-              </label>
+            <h2 className="text-lg font-semibold">1. Pilih kesalahan</h2>
+            <div className="grid gap-5">
               <div className="space-y-2">
                 <p className="text-sm">Jenis kesalahan</p>
                 <Picker
                   kind="violation-types"
                   label={
                     type
-                      ? `${type.code} · ${type.name}`
+                      ? `Pilih jenis kesalahan: ${type.name}`
                       : "Pilih jenis kesalahan"
                   }
                   onPick={selectType}
@@ -310,14 +304,14 @@ export function FineForm({
           </label>
           <textarea
             id="fine-description"
-            className={selectClass + " h-28 py-3"}
+            className={selectClass + " h-20 py-3"}
             maxLength={1000}
             {...register("description")}
           />
           <p className="text-xs text-foreground/65">
-            Minimal 3 karakter saat posting.{" "}
+            Terisi dari jenis kesalahan. Anda bisa menambahkan rincian.{" "}
             {locked
-              ? "Histori ledger sudah ada; hanya deskripsi yang dapat dikoreksi."
+              ? "Riwayat pembayaran sudah ada; hanya deskripsi yang dapat dikoreksi."
               : "Data belum lengkap dapat disimpan sebagai draft."}
           </p>
         </div>
@@ -325,14 +319,14 @@ export function FineForm({
           <section className="space-y-4 rounded-xl border bg-background p-4 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold">Alokasi per peserta</h2>
+                <h2 className="text-lg font-semibold">2. Pilih karyawan</h2>
                 <p className="mt-1 text-sm text-foreground/65">
-                  {fields.length} dari maksimal 20 peserta
+                  {fields.length} karyawan dipilih
                 </p>
               </div>
               <Picker
                 kind="employees"
-                label="Tambah peserta"
+                label="Pilih karyawan"
                 selected={members.flatMap((m) =>
                   m.employeeId ? [m.employeeId] : []
                 )}
@@ -356,7 +350,7 @@ export function FineForm({
             </div>
             {fields.length === 0 && (
               <p className="rounded-lg border border-dashed p-5 text-sm text-foreground/65">
-                Belum ada peserta. Tambahkan karyawan untuk menghitung alokasi.
+                Pilih karyawan. Nominal otomatis mengikuti jenis kesalahan.
               </p>
             )}
             <div className="divide-y">
@@ -400,8 +394,8 @@ export function FineForm({
                     )}
                     <p className="text-xs text-foreground/65">
                       {members[i]?.manual
-                        ? "Nominal individual"
-                        : "Mengikuti tarif jenis"}
+                        ? "Nominal diubah manual"
+                        : "Nominal otomatis"}
                     </p>
                   </div>
                   <label className="block space-y-2 text-sm">
@@ -427,23 +421,29 @@ export function FineForm({
                 </div>
               ))}
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              className="min-h-11 whitespace-normal"
-              disabled={fields.length >= 20}
-              onClick={() =>
-                append({
-                  employeeId: "",
-                  rawEmployeeName: "",
-                  name: "",
-                  amount: "",
-                  manual: true,
-                })
-              }
+            <Disclosure
+              title="Karyawan belum ada di daftar?"
+              summary="Simpan nama dari sumber sebagai draft"
             >
-              Tambah nama dari sumber untuk draft
-            </Button>
+              {" "}
+              <Button
+                type="button"
+                variant="ghost"
+                className="min-h-11 whitespace-normal"
+                disabled={fields.length >= 20}
+                onClick={() =>
+                  append({
+                    employeeId: "",
+                    rawEmployeeName: "",
+                    name: "",
+                    amount: "",
+                    manual: true,
+                  })
+                }
+              >
+                Tambah nama dari sumber untuk draft
+              </Button>
+            </Disclosure>{" "}
             <div className="flex flex-wrap justify-between gap-2 border-t pt-4">
               <span className="text-sm">
                 {saved?.status === "POSTED"
@@ -455,22 +455,37 @@ export function FineForm({
               </output>
             </div>
             <p className="text-xs text-foreground/65">
-              Total berasal dari penjumlahan nominal tiap peserta. Draft belum
-              menambah saldo denda.
+              Periksa nominal sebelum menyimpan. Draft belum menambah saldo
+              denda.
             </p>
           </section>
         )}
-        {saved?.status !== "POSTED" && (
-          <label className="block space-y-2 text-sm">
-            <span>Teks sumber (opsional)</span>
-            <textarea
-              className={selectClass + " h-24 py-3"}
-              maxLength={10000}
-              {...register("sourceText")}
-            />
-          </label>
-        )}
-        <div className="flex flex-wrap gap-3 border-t pt-5">
+        <Disclosure
+          title="Tanggal dan catatan tambahan"
+          summary="Tanggal hari ini sudah terisi untuk pencatatan baru"
+        >
+          {!locked && (
+            <label className="space-y-2 text-sm">
+              <span>Tanggal dan waktu (WIB)</span>
+              <Input
+                type="datetime-local"
+                className={fieldClass + " w-full min-w-0"}
+                {...register("occurredAt")}
+              />
+            </label>
+          )}{" "}
+          {saved?.status !== "POSTED" && (
+            <label className="block space-y-2 text-sm">
+              <span>Teks sumber (opsional)</span>
+              <textarea
+                className={selectClass + " h-24 py-3"}
+                maxLength={10000}
+                {...register("sourceText")}
+              />
+            </label>
+          )}
+        </Disclosure>
+        <div className="flex flex-wrap gap-3 border-t bg-background pt-5">
           <Button
             type="submit"
             className="min-h-11"
@@ -492,7 +507,7 @@ export function FineForm({
                 void handleSubmit((v) => save(v, true))()
               }}
             >
-              {busy ? "Memproses…" : "Posting denda"}
+              {busy ? "Memproses…" : "Simpan denda"}
             </Button>
           )}
           {onCancel && (

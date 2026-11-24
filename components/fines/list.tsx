@@ -12,6 +12,7 @@ import {
 } from "@/components/master/shared"
 import { Picker } from "./picker"
 import { caseLabels, type Fine } from "@/lib/fines"
+import { Disclosure } from "@/components/workspace/disclosure"
 import { FineCard } from "./card"
 import { FinePagination } from "./pagination"
 import type { Page, Employee, Violation } from "@/lib/master"
@@ -48,10 +49,10 @@ export function FineList() {
       <PageHeader
         eyebrow="Register operasional"
         title="Kejadian denda"
-        description="Draft, alokasi, dan histori kejadian dalam satu pencatatan."
+        description="Cari denda, lengkapi draft, atau lihat pembayaran."
         actions={
           <Link
-            className="inline-flex min-h-11 items-center rounded-full bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-2"
+            className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-2"
             href="/fines/new"
           >
             Catat kejadian
@@ -76,8 +77,8 @@ export function FineList() {
           setQuery("&" + params.toString())
         }}
       >
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <label className="space-y-2 text-sm">
+        <div className="flex items-end gap-2">
+          <label className="min-w-0 flex-1 space-y-2 text-sm">
             <span>Cari kode, deskripsi, atau peserta</span>
             <Input
               className={fieldClass}
@@ -86,77 +87,93 @@ export function FineList() {
               maxLength={120}
             />
           </label>
-          <div className="space-y-2 text-sm">
-            <label htmlFor="fine-status">Status kejadian</label>
-            <select
-              id="fine-status"
-              className={selectClass}
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="">Semua status</option>
-              {Object.entries(caseLabels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+          <Button type="submit" variant="outline" className="min-h-11">
+            Cari
+          </Button>
+        </div>
+        <Disclosure
+          title="Filter denda"
+          summary={
+            query.replace(/^&/, "")
+              ? "Filter diterapkan · ketuk untuk mengubah"
+              : "Status, tanggal, karyawan, dan jenis kesalahan"
+          }
+        >
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="space-y-2 text-sm">
+              <label htmlFor="fine-status">Status kejadian</label>
+              <select
+                id="fine-status"
+                className={selectClass}
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="">Semua status</option>
+                {Object.entries(caseLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <label className="space-y-2 text-sm">
+              <span>Dari tanggal (WIB)</span>
+              <Input
+                type="date"
+                className={fieldClass + " w-full min-w-0"}
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+              />
+            </label>
+            <label className="space-y-2 text-sm">
+              <span>Sampai tanggal (WIB)</span>
+              <Input
+                type="date"
+                className={fieldClass + " w-full min-w-0"}
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+              />
+            </label>
           </div>
-          <label className="space-y-2 text-sm">
-            <span>Dari tanggal (WIB)</span>
-            <Input
-              type="date"
-              className={fieldClass + " w-full min-w-0"}
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
+          <div className="flex flex-wrap gap-3">
+            <Picker
+              kind="employees"
+              label={
+                employee
+                  ? "Karyawan: " + employee.displayName
+                  : "Filter karyawan"
+              }
+              all
+              onPick={(v) => setEmployee(v as Employee)}
             />
-          </label>
-          <label className="space-y-2 text-sm">
-            <span>Sampai tanggal (WIB)</span>
-            <Input
-              type="date"
-              className={fieldClass + " w-full min-w-0"}
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
+            <Picker
+              kind="violation-types"
+              label={type ? "Jenis: " + type.name : "Filter jenis"}
+              all
+              onPick={(v) => setType(v as Violation)}
             />
-          </label>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Picker
-            kind="employees"
-            label={
-              employee ? "Karyawan: " + employee.displayName : "Filter karyawan"
-            }
-            all
-            onPick={(v) => setEmployee(v as Employee)}
-          />
-          <Picker
-            kind="violation-types"
-            label={type ? "Jenis: " + type.name : "Filter jenis"}
-            all
-            onPick={(v) => setType(v as Violation)}
-          />
-          <Button type="submit" className="min-h-11 hover:bg-primary/90">
-            Terapkan filter
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            className="min-h-11"
-            onClick={() => {
-              setQ("")
-              setStatus("")
-              setFrom("")
-              setTo("")
-              setEmployee(null)
-              setType(null)
-              setPage(1)
-              setQuery("")
-            }}
-          >
-            Reset filter
-          </Button>
-        </div>
+            <Button type="submit" className="min-h-11 hover:bg-primary/90">
+              Terapkan filter
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="min-h-11"
+              onClick={() => {
+                setQ("")
+                setStatus("")
+                setFrom("")
+                setTo("")
+                setEmployee(null)
+                setType(null)
+                setPage(1)
+                setQuery("")
+              }}
+            >
+              Reset filter
+            </Button>
+          </div>
+        </Disclosure>
       </form>
       <section aria-labelledby="fine-results-heading" className="space-y-5">
         <div className="flex flex-wrap items-end justify-between gap-4">

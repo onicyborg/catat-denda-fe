@@ -1,3 +1,4 @@
+import { openPanel } from "./helpers/disclosure"
 import { test, expect } from "@playwright/test"
 import { contrastFailures } from "./helpers/contrast"
 
@@ -63,11 +64,16 @@ test("workspace charts reflect real cohort data and reflow across themes and scr
   const errors: string[] = []
   page.on("pageerror", (error) => errors.push(error.message))
   await page.setViewportSize({ width: 1440, height: 1050 })
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  )
   await page.goto(route)
+  await openPanel(page, "Grafik penyelesaian")
   const chart = page.getByRole("region", {
     name: "Penyelesaian alokasi",
     exact: true,
   })
+  await openPanel(page, "Grafik penyelesaian")
   await expect(chart.getByRole("figure")).toHaveAccessibleName(
     "40% alokasi periode telah dibayar"
   )
@@ -78,7 +84,7 @@ test("workspace charts reflect real cohort data and reflow across themes and scr
     page
       .locator("dl")
       .filter({
-        has: page.getByText("Pembayaran bersih pada periode", { exact: true }),
+        has: page.getByText("Pembayaran periode ini", { exact: true }),
       })
       .getByText("Rp 0", { exact: true })
   ).toBeVisible()
@@ -100,11 +106,16 @@ test("workspace charts reflect real cohort data and reflow across themes and scr
   for (const theme of ["light", "dark"]) {
     await page.evaluate((theme) => localStorage.setItem("theme", theme), theme)
     await page.reload()
+    await openPanel(page, "Grafik penyelesaian")
     await expect(chart.getByRole("figure")).toHaveAccessibleName(
       "40% alokasi periode telah dibayar"
     )
     for (const width of [320, 360, 640, 768, 1024, 1440, 1920]) {
       await page.setViewportSize({ width, height: 1050 })
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+      )
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth
@@ -116,6 +127,10 @@ test("workspace charts reflect real cohort data and reflow across themes and scr
       await contrastFailures(page, '.workspace *, [role="dialog"] *')
     ).toEqual([])
     await page.setViewportSize({ width: 1440, height: 1050 })
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+    )
     if (theme === "light")
       await page.screenshot({ path: "/tmp/catat-denda-redesign-preview.png" })
     await page.screenshot({
@@ -123,6 +138,10 @@ test("workspace charts reflect real cohort data and reflow across themes and scr
       fullPage: true,
     })
     await page.setViewportSize({ width: 390, height: 844 })
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+    )
     await page.screenshot({
       path: `/tmp/catat-denda-redesign-mobile-${theme}.png`,
       fullPage: true,
@@ -143,9 +162,11 @@ test("workspace charts reflect real cohort data and reflow across themes and scr
   await page.goto(
     `/dashboard?from=2024-01-01&to=2024-01-31&violationTypeId=${type.id}`
   )
+  await openPanel(page, "Grafik penyelesaian")
   await expect(
     chart.getByText("Belum ada alokasi pada periode ini.", { exact: true })
   ).toBeVisible()
+  await openPanel(page, "Grafik penyelesaian")
   await expect(chart.getByRole("figure")).toHaveCount(0)
   await expect(ranking.getByRole("listitem").first()).toContainText(
     /Rp\s?10\.000/
@@ -159,6 +180,7 @@ test("workspace charts reflect real cohort data and reflow across themes and scr
       })
   }
   await page.goto(route)
+  await openPanel(page, "Grafik penyelesaian")
   await expect(chart.getByRole("figure")).toHaveAccessibleName(
     "100% alokasi periode telah dibayar"
   )

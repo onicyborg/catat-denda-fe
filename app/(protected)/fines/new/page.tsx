@@ -11,10 +11,9 @@ export default function Page() {
       </Link>
       <div>
         <p className="mb-2 text-sm text-foreground/65">Pencatatan baru</p>
-        <h1 className="text-3xl font-semibold">Catat kejadian</h1>
+        <h1 className="text-2xl font-semibold">Catat kejadian</h1>
         <p className="mt-3 text-sm text-foreground/65">
-          Pilih peserta dan tentukan alokasi masing-masing. Data yang belum
-          lengkap dapat disimpan sebagai draft.
+          Pilih jenis kesalahan dan karyawan. Nominal akan terisi otomatis.
         </p>
       </div>
       <FineForm />

@@ -1,6 +1,7 @@
 "use client"
 import Link from "next/link"
 import { Suspense } from "react"
+import { Disclosure } from "@/components/workspace/disclosure"
 import { EmployeeFinance } from "@/components/reporting/employee-finance"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -31,6 +32,7 @@ const aliasSchema = z.object({
 export function EmployeeDetail({ id }: { id: string }) {
   const resource = useResource<Employee>(`/employees/${id}`),
     admin = useAdmin()
+  const [aliasesOpen, setAliasesOpen] = useState(false)
   const [error, setError] = useState(""),
     [message, setMessage] = useState("")
   const {
@@ -99,90 +101,98 @@ export function EmployeeDetail({ id }: { id: string }) {
               </div>
             </header>
             <Feedback message={message} />
-            <section className="space-y-5 rounded-xl border bg-background p-5 sm:p-6">
-              <div>
-                <h2 className="text-xl font-semibold">Alias nama</h2>
-                <p className="mt-2 max-w-xl text-sm leading-relaxed text-foreground/65">
-                  Tambahkan nama panggilan untuk membantu pencarian. Alias hanya
-                  boleh terhubung ke satu karyawan dan tidak menggabungkan
-                  histori.
-                </p>
-              </div>
-              {employee.aliases.length === 0 ? (
-                <p className="text-sm text-foreground/65">Belum ada alias.</p>
-              ) : (
-                <ul className="divide-y">
-                  {employee.aliases.map((alias) => (
-                    <li
-                      key={alias.id}
-                      className="flex flex-wrap items-center justify-between gap-3 py-3"
-                    >
-                      <span className="min-w-0 text-sm break-words">
-                        {alias.aliasDisplay}
-                      </span>
-                      <ConfirmAction
-                        label="Hapus alias"
-                        title={`Hapus alias ${alias.aliasDisplay}?`}
-                        description="Alias dihapus dari pencarian. Catatan kejadian tetap tersimpan."
-                        path={`/employees/${id}/aliases/${alias.id}`}
-                        method="DELETE"
-                        onDone={() => saved("Alias berhasil dihapus.")}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <form
-                className="space-y-3 border-t pt-5"
-                noValidate
-                onSubmit={handleSubmit(async (values) => {
-                  setError("")
-                  setMessage("")
-                  try {
-                    await api(`/employees/${id}/aliases`, {
-                      method: "POST",
-                      headers: { "X-CSRF-Token": admin.csrfToken },
-                      body: JSON.stringify(values),
-                    })
-                    reset()
-                    saved("Alias berhasil ditambahkan.")
-                  } catch (err) {
-                    setError((err as Error).message)
-                  }
-                })}
-              >
-                <label
-                  htmlFor="alias-name"
-                  className="block text-sm font-medium"
-                >
-                  Alias baru
-                </label>
-                <div className="flex flex-wrap gap-3">
-                  <Input
-                    id="alias-name"
-                    className={`${fieldClass} min-w-0 flex-1 basis-48`}
-                    maxLength={120}
-                    {...register("aliasDisplay")}
-                    aria-invalid={!!errors.aliasDisplay}
-                    aria-describedby="alias-error"
-                  />
-                  <Button
-                    className="h-11"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Menyimpan…" : "Tambah alias"}
-                  </Button>
-                </div>
-                <FieldError id="alias-error">
-                  {errors.aliasDisplay?.message}
-                </FieldError>
-                <Feedback error={error} />
-              </form>
-            </section>
             <Suspense fallback={<p role="status">Memuat saldo dan histori…</p>}>
               <EmployeeFinance id={id} />
             </Suspense>
+            <Disclosure
+              title="Nama panggilan karyawan"
+              open={aliasesOpen}
+              onOpenChange={setAliasesOpen}
+              summary="Kelola alias untuk membantu pencarian"
+            >
+              {" "}
+              <section className="space-y-5 rounded-xl border bg-background p-5 sm:p-6">
+                <div>
+                  <h2 className="text-xl font-semibold">Alias nama</h2>
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-foreground/65">
+                    Tambahkan nama panggilan untuk membantu pencarian. Alias
+                    hanya boleh terhubung ke satu karyawan dan tidak
+                    menggabungkan histori.
+                  </p>
+                </div>
+                {employee.aliases.length === 0 ? (
+                  <p className="text-sm text-foreground/65">Belum ada alias.</p>
+                ) : (
+                  <ul className="divide-y">
+                    {employee.aliases.map((alias) => (
+                      <li
+                        key={alias.id}
+                        className="flex flex-wrap items-center justify-between gap-3 py-3"
+                      >
+                        <span className="min-w-0 text-sm break-words">
+                          {alias.aliasDisplay}
+                        </span>
+                        <ConfirmAction
+                          label="Hapus alias"
+                          title={`Hapus alias ${alias.aliasDisplay}?`}
+                          description="Alias dihapus dari pencarian. Catatan kejadian tetap tersimpan."
+                          path={`/employees/${id}/aliases/${alias.id}`}
+                          method="DELETE"
+                          onDone={() => saved("Alias berhasil dihapus.")}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <form
+                  className="space-y-3 border-t pt-5"
+                  noValidate
+                  onSubmit={handleSubmit(async (values) => {
+                    setError("")
+                    setMessage("")
+                    try {
+                      await api(`/employees/${id}/aliases`, {
+                        method: "POST",
+                        headers: { "X-CSRF-Token": admin.csrfToken },
+                        body: JSON.stringify(values),
+                      })
+                      reset()
+                      saved("Alias berhasil ditambahkan.")
+                    } catch (err) {
+                      setError((err as Error).message)
+                    }
+                  })}
+                >
+                  <label
+                    htmlFor="alias-name"
+                    className="block text-sm font-medium"
+                  >
+                    Alias baru
+                  </label>
+                  <div className="flex flex-wrap gap-3">
+                    <Input
+                      id="alias-name"
+                      className={`${fieldClass} min-w-0 flex-1 basis-48`}
+                      maxLength={120}
+                      {...register("aliasDisplay")}
+                      aria-invalid={!!errors.aliasDisplay}
+                      aria-describedby="alias-error"
+                    />
+                    <Button
+                      className="h-11"
+                      type="submit"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Menyimpan…" : "Tambah alias"}
+                    </Button>
+                  </div>
+                  <FieldError id="alias-error">
+                    {errors.aliasDisplay?.message}
+                  </FieldError>
+                  <Feedback error={error} />
+                </form>
+              </section>
+            </Disclosure>
           </>
         )}
       </LoadState>

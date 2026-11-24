@@ -9,28 +9,28 @@ import {
 export function Metrics({ data }: { data: ReportSummary }) {
   const rows = [
     [
-      "Kejadian diposting pada periode",
+      "Denda periode ini",
       data.caseCount,
       false,
       RiFileList3Line,
       "Sesuai tanggal kejadian",
     ],
     [
-      "Alokasi kejadian pada periode",
+      "Total denda periode ini",
       data.assessedAmount,
       true,
       RiMoneyDollarCircleLine,
       "Total tanggung jawab peserta",
     ],
     [
-      "Pembayaran bersih pada periode",
+      "Pembayaran periode ini",
       data.periodNetPaidAmount,
       true,
       RiWallet3Line,
-      "Pembayaran dikurangi reversal",
+      "Pembayaran dikurangi pembalikan",
     ],
     [
-      "Sisa seluruh kejadian saat ini",
+      "Sisa denda saat ini",
       data.currentOutstandingAmount,
       true,
       RiTimeLine,
@@ -63,12 +63,16 @@ export function Metrics({ data }: { data: ReportSummary }) {
           </div>
         ))}
       </div>
-      <p className="max-w-5xl text-xs leading-relaxed text-foreground/65">
-        Alokasi mengikuti tanggal kejadian. Pembayaran bersih mengikuti tanggal
-        efektif PAYMENT dikurangi REVERSAL, termasuk histori kejadian
-        dibatalkan. Sisa saat ini lintas periode, dengan filter karyawan/jenis
-        yang dipilih.
-      </p>
+      <details className="text-xs text-foreground/70">
+        <summary className="cursor-pointer content-center">
+          Cara membaca ringkasan
+        </summary>
+        <p className="max-w-3xl pb-3 leading-relaxed">
+          Total denda mengikuti tanggal kejadian. Pembayaran mengikuti tanggal
+          transaksi dan sudah dikurangi pembalikan. Sisa denda saat ini mencakup
+          semua periode sesuai filter.
+        </p>
+      </details>
     </div>
   )
 }

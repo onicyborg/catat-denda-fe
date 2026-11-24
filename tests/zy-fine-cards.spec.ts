@@ -1,3 +1,5 @@
+import { openPanel } from "./helpers/disclosure"
+import { revealControl } from "./helpers/disclosure"
 import { test, expect, type Page } from "@playwright/test"
 import { contrastFailures } from "./helpers/contrast"
 import type { Fine } from "../lib/fines"
@@ -38,7 +40,9 @@ test.beforeAll(async ({ request }) => {
 })
 async function openList(page: Page) {
   await page.goto("/fines")
+  await revealControl(page, "Cari kode, deskripsi, atau peserta")
   await page.getByLabel("Cari kode, deskripsi, atau peserta").fill(suffix)
+  await openPanel(page, "Filter denda")
   await page.getByRole("button", { name: "Terapkan filter" }).click()
   await expect(page.getByRole("status")).toHaveText(
     "Menampilkan 1–6 dari 13 kejadian"
@@ -88,12 +92,14 @@ test("server pagination, newest creation order, full-card clicks and keyboard li
   await expect(page.getByRole("status")).toHaveText(
     "Menampilkan 13–13 dari 13 kejadian"
   )
+  await revealControl(page, "Per halaman")
   await page.getByLabel("Per halaman").selectOption("12")
   await expect(cards(page)).toHaveCount(12)
   await expect(page.getByRole("status")).toHaveText(
     "Menampilkan 1–12 dari 13 kejadian"
   )
   await page.getByRole("button", { name: "Berikutnya", exact: true }).click()
+  await openPanel(page, "Filter denda")
   await page.getByRole("button", { name: "Terapkan filter" }).click()
   await expect(page.getByRole("status")).toHaveText(
     "Menampilkan 1–12 dari 13 kejadian"
@@ -114,6 +120,10 @@ test("cards reflow in both themes, reduced motion and narrow screens", async ({
     }, theme)
     for (const width of [320, 375, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 })
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+      )
       await overflow(page)
       await expect.poll(() => contrastFailures(page)).toEqual([])
       await expect(
@@ -145,6 +155,10 @@ test("cards reflow in both themes, reduced motion and narrow screens", async ({
       })
     }
     await page.setViewportSize({ width: 812, height: 375 })
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+    )
     await overflow(page)
   }
 })
@@ -168,9 +182,11 @@ test("error retry, loading, empty filters, posted and voided amounts", async ({
   fail = false
   await page.getByRole("button", { name: "Coba lagi" }).click()
   await expect(cards(page)).toHaveCount(6)
+  await revealControl(page, "Cari kode, deskripsi, atau peserta")
   await page
     .getByLabel("Cari kode, deskripsi, atau peserta")
     .fill("NO-MATCH-" + suffix)
+  await openPanel(page, "Filter denda")
   await page.getByRole("button", { name: "Terapkan filter" }).click()
   await expect(
     page.getByText("0 kejadian ditemukan", { exact: true })

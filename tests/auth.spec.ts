@@ -1,3 +1,4 @@
+import { revealControl } from "./helpers/disclosure"
 import { test, expect } from "@playwright/test"
 const credentials = {
   username: "browser.admin",
@@ -5,18 +6,17 @@ const credentials = {
 }
 async function login(page: import("@playwright/test").Page) {
   await page.goto("/login")
+  await revealControl(page, "Username")
   await page.getByLabel("Username", { exact: true }).fill(credentials.username)
+  await revealControl(page, "Kata sandi")
   await page
     .getByLabel("Kata sandi", { exact: true })
     .fill(credentials.password)
   await page.getByRole("button", { name: "Masuk", exact: true }).click()
   await expect(page).toHaveURL(/dashboard$/)
-  await expect(
-    page.getByRole("button", { name: "Keluar", exact: true })
-  ).toBeVisible()
   const menu = page.getByRole("button", { name: "Menu", exact: true })
   if (await menu.isVisible()) await menu.click()
-  await page.getByRole("link", { name: "Akun", exact: true }).click()
+  await page.getByRole("link", { name: "Pengaturan", exact: true }).click()
   await expect(page.getByRole("heading", { name: "Akun admin" })).toBeVisible()
 }
 test("unsaved password form survives window refocus", async ({ page }) => {
@@ -48,9 +48,11 @@ test("expired session during password mutation redirects to login", async ({
   context,
 }) => {
   await login(page)
+  await revealControl(page, "Kata sandi lama")
   await page
     .getByLabel("Kata sandi lama", { exact: true })
     .fill(credentials.password)
+  await revealControl(page, "Kata sandi baru (minimal 12 karakter)")
   await page
     .getByLabel("Kata sandi baru (minimal 12 karakter)", { exact: true })
     .fill("temporary-password-123")
@@ -66,8 +68,13 @@ test("desktop/mobile login, wrong password, password rotation and logout", async
   const errors: string[] = []
   page.on("pageerror", (error) => errors.push(error.message))
   await page.setViewportSize({ width: 1440, height: 900 })
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  )
   await page.goto("/login")
+  await revealControl(page, "Username")
   await page.getByLabel("Username", { exact: true }).fill(credentials.username)
+  await revealControl(page, "Kata sandi")
   await page
     .getByLabel("Kata sandi", { exact: true })
     .fill("incorrect-password")
@@ -80,17 +87,15 @@ test("desktop/mobile login, wrong password, password rotation and logout", async
   await expect(page.getByLabel("Username", { exact: true })).toHaveValue(
     credentials.username
   )
+  await revealControl(page, "Kata sandi")
   await page
     .getByLabel("Kata sandi", { exact: true })
     .fill(credentials.password)
   await page.getByRole("button", { name: "Masuk", exact: true }).click()
   await expect(page).toHaveURL(/dashboard$/)
-  await expect(
-    page.getByRole("button", { name: "Keluar", exact: true })
-  ).toBeVisible()
   const menu = page.getByRole("button", { name: "Menu", exact: true })
   if (await menu.isVisible()) await menu.click()
-  await page.getByRole("link", { name: "Akun", exact: true }).click()
+  await page.getByRole("link", { name: "Pengaturan", exact: true }).click()
   const other = await browser.newContext({ baseURL: "http://localhost:3100" })
   try {
     const res = await other.request.post("/api/v1/auth/login", {
@@ -133,12 +138,20 @@ test("desktop/mobile login, wrong password, password rotation and logout", async
     ).toBeTruthy()
     for (const width of [360, 1440]) {
       await page.setViewportSize({ width, height: 800 })
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+      )
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth
         )
       ).toBeTruthy()
     }
+    if (
+      await page.getByRole("button", { name: "Menu", exact: true }).isVisible()
+    )
+      await page.getByRole("button", { name: "Menu", exact: true }).click()
     await page.getByRole("button", { name: "Keluar", exact: true }).click()
     await expect(page).toHaveURL(/login$/)
     expect(

@@ -52,7 +52,7 @@ export function Reports() {
       <PageHeader
         eyebrow={summary.data?.businessName ?? "Register operasional"}
         title="Laporan"
-        description="Rekap kejadian, saldo kohort, dan ekspor dengan definisi tanggal yang sama."
+        description="Rekap kejadian, saldo periode, dan ekspor dengan definisi tanggal yang sama."
       />
       <ReportFilters key={url.key} values={v} onApply={url.update} cases />
       <Button
@@ -74,9 +74,9 @@ export function Reports() {
         {summary.data && <Metrics data={summary.data} />}
       </LoadState>
       <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Saldo kohort per karyawan</h2>
+        <h2 className="text-xl font-semibold">Denda per karyawan</h2>
         <p className="text-sm text-foreground/65">
-          Case POSTED dengan tanggal kejadian pada periode. Pembayaran kumulatif
+          Denda aktif dengan tanggal kejadian pada periode. Pembayaran terhitung
           hingga saat ini untuk alokasi tersebut, termasuk pembayaran di luar
           periode.
         </p>
@@ -87,7 +87,10 @@ export function Reports() {
               {summary.data.allocationCount} alokasi
             </p>
             <p>Dibayar kumulatif {money(summary.data.cohortNetPaidAmount)}</p>
-            <p>Sisa kohort {money(summary.data.cohortOutstandingAmount)}</p>
+            <p>
+              Sisa denda periode ini{" "}
+              {money(summary.data.cohortOutstandingAmount)}
+            </p>
           </div>
         )}
         <LoadState

@@ -2,7 +2,7 @@ import type { components } from "./api-schema"
 export type Fine = components["schemas"]["FineResponse"]
 export const caseLabels = {
   DRAFT: "Draft",
-  POSTED: "Diposting",
+  POSTED: "Aktif",
   VOIDED: "Dibatalkan",
 }
 export const settlementLabels = {

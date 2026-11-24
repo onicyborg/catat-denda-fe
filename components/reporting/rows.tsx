@@ -15,60 +15,65 @@ export function CaseRows({
       }
     >
       {rows.map((row) => (
-        <article
-          key={row.id}
-          className={`flex min-w-0 flex-wrap justify-between gap-3 ${compact ? "py-4 first:pt-0 last:pb-0" : "p-4 sm:p-5"}`}
-        >
-          <div className="min-w-0 flex-1 basis-40 space-y-1.5">
-            <Link
-              className="inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4 focus-visible:outline-2"
-              href={"/fines/" + row.id}
-            >
-              {row.caseCode}
-            </Link>
-            <p className="text-xs text-foreground/65">
-              {caseLabels[row.status]} · {wib(row.occurredAt)}
-            </p>
-            <p className="text-sm break-words">
-              {row.violationName ?? "Jenis belum ditentukan"}
-            </p>
-            {(!compact || row.status === "DRAFT") && (
-              <p
-                className={`text-sm [overflow-wrap:anywhere] break-words text-foreground/65 ${compact ? "line-clamp-2" : ""}`}
-              >
-                {row.description ?? "Deskripsi belum diisi"}
-              </p>
-            )}
-            {!compact && (
+        <article key={row.id}>
+          <Link
+            href={"/fines/" + row.id}
+            aria-label={row.caseCode}
+            className={`flex w-full min-w-0 flex-wrap justify-between gap-3 rounded-lg hover:bg-muted/30 focus-visible:outline-2 ${compact ? "py-4 first:pt-0 last:pb-0" : "p-4 sm:p-5"}`}
+          >
+            <div className="min-w-0 flex-1 basis-40 space-y-1.5">
+              <span className="inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4 focus-visible:outline-2">
+                {row.caseCode}
+              </span>
               <p className="text-xs text-foreground/65">
-                {row.allocationCount} alokasi sesuai filter
-                {row.unknownAmountCount !== "0"
-                  ? ` · ${row.unknownAmountCount} nominal belum diisi`
-                  : ""}
+                {caseLabels[row.status]} · {wib(row.occurredAt)}
               </p>
-            )}
-          </div>
-          <div className="min-w-0 space-y-2">
-            <p className="text-xs text-foreground/65">
-              {row.status === "DRAFT"
-                ? "Preview alokasi"
-                : row.status === "POSTED"
-                  ? "Alokasi aktif"
-                  : "Saldo aktif"}
-            </p>
-            <p
-              className={`${compact ? "text-base" : "text-xl"} font-semibold [overflow-wrap:anywhere] tabular-nums`}
-            >
-              {money(
-                row.status === "DRAFT" ? row.previewAmount : row.assessedAmount
+              <p className="text-sm break-words">
+                {row.violationName ?? "Jenis belum ditentukan"}
+              </p>
+              {(!compact || row.status === "DRAFT") && (
+                <p
+                  className={`text-sm [overflow-wrap:anywhere] break-words text-foreground/65 ${compact ? "line-clamp-2" : ""}`}
+                >
+                  {row.description ?? "Deskripsi belum diisi"}
+                </p>
               )}
-            </p>
-            {row.status === "POSTED" && (
-              <p className="text-sm text-foreground/65">
-                Sisa kohort {money(row.outstandingAmount)}
+              {!compact && (
+                <p className="text-xs text-foreground/65">
+                  {row.allocationCount} alokasi sesuai filter
+                  {row.unknownAmountCount !== "0"
+                    ? ` · ${row.unknownAmountCount} nominal belum diisi`
+                    : ""}
+                </p>
+              )}
+            </div>
+            <div className="min-w-0 space-y-2">
+              <p className="text-xs text-foreground/65">
+                {row.status === "DRAFT"
+                  ? "Preview alokasi"
+                  : row.status === "POSTED"
+                    ? "Alokasi aktif"
+                    : "Saldo aktif"}
               </p>
-            )}
-          </div>
+              <p
+                className={`${compact ? "text-base" : "text-xl"} font-semibold [overflow-wrap:anywhere] tabular-nums`}
+              >
+                {row.status === "DRAFT" &&
+                (row.unknownAmountCount !== "0" || row.allocationCount === "0")
+                  ? "Belum lengkap"
+                  : money(
+                      row.status === "DRAFT"
+                        ? row.previewAmount
+                        : row.assessedAmount
+                    )}
+              </p>
+              {row.status === "POSTED" && (
+                <p className="text-sm text-foreground/65">
+                  Sisa denda {money(row.outstandingAmount)}
+                </p>
+              )}
+            </div>
+          </Link>
         </article>
       ))}
     </div>
@@ -103,7 +108,7 @@ export function BalanceRows({
           {[
             [allDates ? "Alokasi aktif" : "Alokasi kohort", row.assessedAmount],
             ["Dibayar kumulatif", row.netPaidAmount],
-            [allDates ? "Sisa saat ini" : "Sisa kohort", row.outstandingAmount],
+            [allDates ? "Sisa saat ini" : "Sisa denda", row.outstandingAmount],
           ].map(([label, value]) => (
             <div key={label}>
               <p className="text-xs text-foreground/65">{label}</p>

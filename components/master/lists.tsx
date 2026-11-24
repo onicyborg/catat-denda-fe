@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import { Disclosure } from "@/components/workspace/disclosure"
 import { PageHeader } from "@/components/workspace/page-header"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -53,8 +54,8 @@ export function MasterList({ kind }: { kind: "employees" | "violations" }) {
         title={employee ? "Karyawan" : "Jenis kesalahan"}
         description={
           employee
-            ? "Kelola profil, kode, dan alias karyawan. Karyawan yang diarsipkan tetap tersimpan dalam histori."
-            : "Tentukan kategori dan tarif default per orang. Nominal kejadian tetap dapat ditentukan saat pencatatan."
+            ? "Pilih karyawan untuk melihat denda dan pembayaran."
+            : "Atur jenis kesalahan dan nominal otomatis per karyawan."
         }
         actions={
           employee ? (
@@ -100,54 +101,61 @@ export function MasterList({ kind }: { kind: "employees" | "violations" }) {
           <Button type="submit" variant="outline" className="h-11 self-end">
             Cari
           </Button>
-          <div className="basis-40">
-            <label
-              htmlFor="master-status"
-              className="mb-2 block text-sm font-medium"
-            >
-              Status
-            </label>
-            <select
-              id="master-status"
-              className={selectClass}
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value)
-                setPage(1)
-                setMessage("")
-              }}
-            >
-              <option value="ACTIVE">Aktif</option>
-              <option value="INACTIVE">Diarsipkan</option>
-              <option value="ALL">Semua status</option>
-            </select>
+          <div className="w-full">
+            <Disclosure title="Filter data">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {" "}
+                <div className="basis-40">
+                  <label
+                    htmlFor="master-status"
+                    className="mb-2 block text-sm font-medium"
+                  >
+                    Status
+                  </label>
+                  <select
+                    id="master-status"
+                    className={selectClass}
+                    value={status}
+                    onChange={(e) => {
+                      setStatus(e.target.value)
+                      setPage(1)
+                      setMessage("")
+                    }}
+                  >
+                    <option value="ACTIVE">Aktif</option>
+                    <option value="INACTIVE">Diarsipkan</option>
+                    <option value="ALL">Semua status</option>
+                  </select>
+                </div>
+                {!employee && (
+                  <div className="basis-52">
+                    <label
+                      htmlFor="master-category"
+                      className="mb-2 block text-sm font-medium"
+                    >
+                      Kategori
+                    </label>
+                    <select
+                      id="master-category"
+                      className={selectClass}
+                      value={category}
+                      onChange={(e) => {
+                        setCategory(e.target.value)
+                        setPage(1)
+                      }}
+                    >
+                      <option value="">Semua kategori</option>
+                      {Object.entries(categories).map(([value, label]) => (
+                        <option value={value} key={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            </Disclosure>
           </div>
-          {!employee && (
-            <div className="basis-52">
-              <label
-                htmlFor="master-category"
-                className="mb-2 block text-sm font-medium"
-              >
-                Kategori
-              </label>
-              <select
-                id="master-category"
-                className={selectClass}
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value)
-                  setPage(1)
-                }}
-              >
-                <option value="">Semua kategori</option>
-                {Object.entries(categories).map(([value, label]) => (
-                  <option value={value} key={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
         </form>
       </div>
       <Feedback message={message} />
@@ -161,13 +169,13 @@ export function MasterList({ kind }: { kind: "employees" | "violations" }) {
             : undefined
         }
       >
-        <ul className="divide-y rounded-xl border bg-background">
+        <ul className="grid gap-3 md:grid-cols-2">
           {resource.data?.data.map((item) => {
             const endpoint = `/${employee ? "employees" : "violation-types"}/${item.id}`
             return (
               <li
                 key={item.id}
-                className="flex flex-wrap items-center justify-between gap-4 p-5"
+                className="flex min-w-0 flex-col items-stretch justify-between gap-4 rounded-xl border bg-background p-4"
               >
                 <div className="min-w-0 flex-1 basis-48 space-y-2">
                   {employee ? (

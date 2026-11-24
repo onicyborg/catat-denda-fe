@@ -55,15 +55,15 @@ export function EmployeeFinance({ id }: { id: string }) {
           <>
             <Metrics data={summary.data} />
             <p className="text-sm text-foreground/65">
-              Kohort tanggal kejadian: dibayar kumulatif{" "}
-              {money(summary.data.cohortNetPaidAmount)}, sisa kohort{" "}
+              Denda pada periode: sudah dibayar{" "}
+              {money(summary.data.cohortNetPaidAmount)}, sisa denda{" "}
               {money(summary.data.cohortOutstandingAmount)}.
             </p>
           </>
         )}
       </LoadState>
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Kejadian POSTED pada periode</h3>
+        <h3 className="text-lg font-semibold">Denda aktif pada periode</h3>
         <p className="text-sm text-foreground/65">
           Hanya alokasi karyawan ini yang dijumlahkan.
         </p>
@@ -86,7 +86,9 @@ export function EmployeeFinance({ id }: { id: string }) {
         />
       </div>
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Ledger efektif pada periode</h3>
+        <h3 className="text-lg font-semibold">
+          Riwayat pembayaran pada periode
+        </h3>
         <p className="text-sm text-foreground/65">
           Tanggal pembayaran/pembalikan, termasuk kejadian dari periode lain.
         </p>
@@ -96,7 +98,7 @@ export function EmployeeFinance({ id }: { id: string }) {
           retry={ledger.reload}
           empty={
             ledger.data?.data.length === 0
-              ? "Tidak ada entri ledger pada periode ini."
+              ? "Belum ada pembayaran pada periode ini."
               : undefined
           }
         >

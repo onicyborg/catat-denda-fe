@@ -130,3 +130,12 @@
     @apply font-sans;
     }
 }
+/* Shared input sizing keeps mobile forms readable and their controls consistent. */
+@layer base {
+  html { scroll-padding-top: 5rem; scroll-padding-bottom: 6rem; }
+  input[type="date"], input[type="datetime-local"], select { color-scheme: light; }
+  .dark input[type="date"], .dark input[type="datetime-local"], .dark select { color-scheme: dark; }
+  summary { min-height: 44px; }
+  @media (max-width: 639px) { [data-slot="dialog-content"] { width: calc(100% - 1rem); max-width: none; max-height: 90dvh; padding: 1.25rem; border-radius: 1rem; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+}

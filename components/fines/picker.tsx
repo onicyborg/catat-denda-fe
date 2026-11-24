@@ -55,7 +55,7 @@ export function Picker({
           </DialogTitle>
           <DialogDescription>
             {kind === "employees"
-              ? "Cari nama, kode atau alias. Nama sama dibedakan dengan kode atau ID."
+              ? "Pilih satu atau beberapa karyawan, lalu tekan Selesai."
               : "Tarif berlaku per peserta. Nominal individual dapat dikoreksi."}
           </DialogDescription>
         </DialogHeader>
@@ -69,6 +69,15 @@ export function Picker({
               if (kind !== "employees" || all) setOpen(false)
             }}
           />
+        )}
+        {kind === "employees" && !all && (
+          <Button
+            type="button"
+            className="min-h-12 w-full"
+            onClick={() => setOpen(false)}
+          >
+            Selesai{selected.length ? ` (${selected.length} dipilih)` : ""}
+          </Button>
         )}
       </DialogContent>
     </Dialog>
@@ -111,7 +120,7 @@ function PickerContent({
         retry={result.reload}
         empty={
           result.data?.data.length === 0
-            ? "Tidak ada pilihan. Tambahkan master aktif jika diperlukan."
+            ? "Belum ada pilihan yang cocok. Coba nama lain atau tambahkan data karyawan/jenis kesalahan."
             : undefined
         }
       >
@@ -132,7 +141,7 @@ function PickerContent({
                 {"displayName" in item ? item.displayName : item.name}
                 <span className="mt-1 block text-xs text-foreground/65">
                   {"employeeCode" in item
-                    ? item.employeeCode || `ID ${item.id.slice(0, 8)}`
+                    ? item.employeeCode || "Tanpa kode"
                     : (item as Violation).code}
                   {!item.isActive ? " · Diarsipkan" : ""}
                 </span>

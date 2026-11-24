@@ -1,4 +1,5 @@
 "use client"
+import { Disclosure } from "@/components/workspace/disclosure"
 import { useState } from "react"
 import { PageHeader } from "@/components/workspace/page-header"
 import { usePathname, useSearchParams, useRouter } from "next/navigation"
@@ -45,7 +46,7 @@ export function AuditLogs() {
     <section className="space-y-6">
       <PageHeader
         eyebrow="Jejak perubahan"
-        title="Audit log"
+        title="Riwayat aktivitas"
         description="Histori hanya baca, mencakup akses admin, perubahan data, pembayaran, dan ekspor."
       />
       <LoadState
@@ -157,107 +158,110 @@ function AuditFilters({
     [action, setAction] = useState(values.action),
     [entity, setEntity] = useState(values.entityType)
   return (
-    <form
-      className="space-y-4 rounded-xl border bg-background p-4 sm:p-5"
-      onSubmit={(e) => {
-        e.preventDefault()
-        onApply({
-          from,
-          to,
-          actorUserId: actor,
-          action,
-          entityType: entity,
-          page: "1",
-        })
-      }}
-    >
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <label className="space-y-2 text-sm">
-          <span>Dari waktu pencatatan (WIB)</span>
-          <Input
-            className={fieldClass + " w-full min-w-0"}
-            type="date"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            required
-          />
-        </label>
-        <label className="space-y-2 text-sm">
-          <span>Sampai waktu pencatatan (WIB)</span>
-          <Input
-            className={fieldClass + " w-full min-w-0"}
-            type="date"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            required
-          />
-        </label>
-        <div className="space-y-2 text-sm">
-          <label htmlFor="audit-actor">Aktor</label>
-          <select
-            id="audit-actor"
-            className={selectClass}
-            value={actor}
-            onChange={(e) => setActor(e.target.value)}
-          >
-            <option value="">Semua aktor</option>
-            {options.actors.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
+    <Disclosure title="Filter aktivitas">
+      {" "}
+      <form
+        className="space-y-4 rounded-xl border bg-background p-4 sm:p-5"
+        onSubmit={(e) => {
+          e.preventDefault()
+          onApply({
+            from,
+            to,
+            actorUserId: actor,
+            action,
+            entityType: entity,
+            page: "1",
+          })
+        }}
+      >
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <label className="space-y-2 text-sm">
+            <span>Dari waktu pencatatan (WIB)</span>
+            <Input
+              className={fieldClass + " w-full min-w-0"}
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              required
+            />
+          </label>
+          <label className="space-y-2 text-sm">
+            <span>Sampai waktu pencatatan (WIB)</span>
+            <Input
+              className={fieldClass + " w-full min-w-0"}
+              type="date"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              required
+            />
+          </label>
+          <div className="space-y-2 text-sm">
+            <label htmlFor="audit-actor">Aktor</label>
+            <select
+              id="audit-actor"
+              className={selectClass}
+              value={actor}
+              onChange={(e) => setActor(e.target.value)}
+            >
+              <option value="">Semua aktor</option>
+              {options.actors.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2 text-sm">
+            <label htmlFor="audit-action">Aksi</label>
+            <select
+              id="audit-action"
+              className={selectClass}
+              value={action}
+              onChange={(e) => setAction(e.target.value)}
+            >
+              <option value="">Semua aksi</option>
+              {options.actions.map((a) => (
+                <option key={a}>{a}</option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2 text-sm">
+            <label htmlFor="audit-entity">Entitas</label>
+            <select
+              id="audit-entity"
+              className={selectClass}
+              value={entity}
+              onChange={(e) => setEntity(e.target.value)}
+            >
+              <option value="">Semua entitas</option>
+              {options.entityTypes.map((e) => (
+                <option key={e}>{e}</option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="space-y-2 text-sm">
-          <label htmlFor="audit-action">Aksi</label>
-          <select
-            id="audit-action"
-            className={selectClass}
-            value={action}
-            onChange={(e) => setAction(e.target.value)}
+        <div className="flex flex-wrap gap-3">
+          <Button className="min-h-11" type="submit">
+            Terapkan filter audit
+          </Button>
+          <Button
+            className="min-h-11"
+            type="button"
+            variant="ghost"
+            onClick={() =>
+              onApply({
+                ...currentMonth(),
+                actorUserId: "",
+                action: "",
+                entityType: "",
+                page: "1",
+              })
+            }
           >
-            <option value="">Semua aksi</option>
-            {options.actions.map((a) => (
-              <option key={a}>{a}</option>
-            ))}
-          </select>
+            Reset filter audit
+          </Button>
         </div>
-        <div className="space-y-2 text-sm">
-          <label htmlFor="audit-entity">Entitas</label>
-          <select
-            id="audit-entity"
-            className={selectClass}
-            value={entity}
-            onChange={(e) => setEntity(e.target.value)}
-          >
-            <option value="">Semua entitas</option>
-            {options.entityTypes.map((e) => (
-              <option key={e}>{e}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <div className="flex flex-wrap gap-3">
-        <Button className="min-h-11" type="submit">
-          Terapkan filter audit
-        </Button>
-        <Button
-          className="min-h-11"
-          type="button"
-          variant="ghost"
-          onClick={() =>
-            onApply({
-              ...currentMonth(),
-              actorUserId: "",
-              action: "",
-              entityType: "",
-              page: "1",
-            })
-          }
-        >
-          Reset filter audit
-        </Button>
-      </div>
-    </form>
+      </form>
+    </Disclosure>
   )
 }

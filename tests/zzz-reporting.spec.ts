@@ -1,3 +1,5 @@
+import { openPanel } from "./helpers/disclosure"
+import { revealControl } from "./helpers/disclosure"
 import { test, expect, type Page } from "@playwright/test"
 import { readFile } from "node:fs/promises"
 import { contrastFailures } from "./helpers/contrast"
@@ -61,7 +63,9 @@ async function fixture(page: Page, suffix: string) {
 const metric = (page: Page, label: string) =>
   page.getByText(label, { exact: true }).locator("..").getByRole("definition")
 async function period(page: Page, from: string, to: string) {
+  await revealControl(page, "Dari tanggal (WIB)")
   await page.getByLabel("Dari tanggal (WIB)", { exact: true }).fill(from)
+  await revealControl(page, "Sampai tanggal (WIB)")
   await page.getByLabel("Sampai tanggal (WIB)", { exact: true }).fill(to)
   await page
     .getByRole("button", { name: "Terapkan periode", exact: true })
@@ -79,6 +83,11 @@ async function downloaded(page: Page, button: string) {
   }
 }
 const noOverflow = async (page: Page) => {
+  await expect
+    .poll(() =>
+      page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)
+    )
+    .toBe(true)
   const check = await page.evaluate(() => ({
     ok: document.documentElement.scrollWidth <= innerWidth,
     offenders: [...document.querySelectorAll("body *")]
@@ -142,22 +151,22 @@ test("reports distinguish cohort, period cashflow, selected allocations, CSV and
   const errors: string[] = []
   page.on("pageerror", (e) => errors.push(e.message))
   await page.setViewportSize({ width: 1440, height: 1000 })
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  )
   await page.goto(
     `/reports?from=2026-01-01&to=2026-01-31&violationTypeId=${type.id}`
   )
-  await expect(metric(page, "Kejadian diposting pada periode")).toHaveText("1")
-  await expect(metric(page, "Alokasi kejadian pada periode")).toHaveText(
+  await expect(metric(page, "Denda periode ini")).toHaveText("1")
+  await expect(metric(page, "Total denda periode ini")).toHaveText(
     /Rp\s?20\.000/
   )
-  await expect(metric(page, "Pembayaran bersih pada periode")).toHaveText(
-    /Rp\s?0/
-  )
-  await expect(metric(page, "Sisa seluruh kejadian saat ini")).toHaveText(
-    /Rp\s?19\.000/
-  )
+  await expect(metric(page, "Pembayaran periode ini")).toHaveText(/Rp\s?0/)
+  await expect(metric(page, "Sisa denda saat ini")).toHaveText(/Rp\s?19\.000/)
   await expect(
     page.getByRole("link", { name: fine.displayCode, exact: true })
   ).toHaveCount(1)
+  await openPanel(page, "Periode dan filter")
   await page
     .getByRole("button", { name: "Filter karyawan", exact: true })
     .click()
@@ -169,15 +178,13 @@ test("reports distinguish cohort, period cashflow, selected allocations, CSV and
   await page
     .getByRole("button", { name: "Terapkan periode", exact: true })
     .click()
-  await expect(metric(page, "Alokasi kejadian pada periode")).toHaveText(
+  await expect(metric(page, "Total denda periode ini")).toHaveText(
     /Rp\s?5\.000/
   )
-  await expect(metric(page, "Sisa seluruh kejadian saat ini")).toHaveText(
-    /Rp\s?4\.000/
-  )
+  await expect(metric(page, "Sisa denda saat ini")).toHaveText(/Rp\s?4\.000/)
   await expect(page).toHaveURL(new RegExp("employeeId=" + employees[0].id))
   await page.reload()
-  await expect(metric(page, "Alokasi kejadian pada periode")).toHaveText(
+  await expect(metric(page, "Total denda periode ini")).toHaveText(
     /Rp\s?5\.000/
   )
   const csv = await downloaded(page, "Unduh CSV kejadian")
@@ -191,12 +198,11 @@ test("reports distinguish cohort, period cashflow, selected allocations, CSV and
     fullPage: true,
   })
   await period(page, "2026-03-01", "2026-03-31")
-  await expect(metric(page, "Pembayaran bersih pada periode")).toHaveText(
+  await expect(metric(page, "Pembayaran periode ini")).toHaveText(
     /-Rp\s?2\.000/
   )
-  await expect(metric(page, "Sisa seluruh kejadian saat ini")).toHaveText(
-    /Rp\s?4\.000/
-  )
+  await expect(metric(page, "Sisa denda saat ini")).toHaveText(/Rp\s?4\.000/)
+  await revealControl(page, "Jenis entri pada CSV pembayaran")
   await page
     .getByLabel("Jenis entri pada CSV pembayaran")
     .selectOption("REVERSAL")
@@ -212,10 +218,17 @@ test("reports distinguish cohort, period cashflow, selected allocations, CSV and
   await expect(
     page.getByRole("alert").filter({ hasText: "Rentang ekspor maksimal" })
   ).toBeVisible()
+  await openPanel(page, "Periode dan filter")
+  await openPanel(page, "Periode dan filter")
   await page
     .getByRole("button", { name: "Semua karyawan", exact: true })
     .click()
+  await revealControl(page, "Status daftar dan CSV kejadian")
   await page.getByLabel("Status daftar dan CSV kejadian").selectOption("DRAFT")
+  await revealControl(
+    page,
+    "Sertakan kejadian tanpa tanggal pada daftar dan CSV"
+  )
   await page
     .getByLabel("Sertakan kejadian tanpa tanggal pada daftar dan CSV")
     .check()
@@ -223,11 +236,13 @@ test("reports distinguish cohort, period cashflow, selected allocations, CSV and
   await expect(
     page.getByText("Draft reporting COHORT", { exact: true })
   ).toBeVisible()
-  await expect(metric(page, "Alokasi kejadian pada periode")).toHaveText(
+  await expect(metric(page, "Total denda periode ini")).toHaveText(
     /Rp\s?20\.000/
   )
   const emptyDraftCsv = await downloaded(page, "Unduh CSV kejadian")
   expect(emptyDraftCsv.text.split("\r\n").filter(Boolean)).toHaveLength(1)
+  await openPanel(page, "Periode dan filter")
+  await openPanel(page, "Periode dan filter")
   await page.getByRole("button", { name: "Semua jenis", exact: true }).click()
   await page
     .getByRole("button", { name: "Terapkan periode", exact: true })
@@ -237,16 +252,14 @@ test("reports distinguish cohort, period cashflow, selected allocations, CSV and
   await expect(
     page.getByRole("heading", { name: "Alokasi dan histori karyawan" })
   ).toBeVisible()
-  await expect(metric(page, "Alokasi kejadian pada periode")).toHaveText(
+  await expect(metric(page, "Total denda periode ini")).toHaveText(
     /Rp\s?5\.000/
   )
   await expect(
     page.getByRole("link", { name: fine.displayCode, exact: true })
   ).toHaveCount(1)
   await period(page, "2026-02-01", "2026-02-28")
-  await expect(metric(page, "Pembayaran bersih pada periode")).toHaveText(
-    /Rp\s?3\.000/
-  )
+  await expect(metric(page, "Pembayaran periode ini")).toHaveText(/Rp\s?3\.000/)
   await expect(
     page.getByRole("link", {
       name: "Pembayaran · " + fine.displayCode,
@@ -254,9 +267,7 @@ test("reports distinguish cohort, period cashflow, selected allocations, CSV and
     })
   ).toHaveCount(2)
   await page.getByRole("button", { name: "Segarkan saldo karyawan" }).click()
-  await expect(metric(page, "Sisa seluruh kejadian saat ini")).toHaveText(
-    /Rp\s?4\.000/
-  )
+  await expect(metric(page, "Sisa denda saat ini")).toHaveText(/Rp\s?4\.000/)
   expect(errors).toEqual([])
 })
 test("dashboard retries, honest cross-period labels, draft review and responsive themes", async ({
@@ -275,29 +286,30 @@ test("dashboard retries, honest cross-period labels, draft review and responsive
   ).toBeVisible()
   fail = false
   await page.getByRole("button", { name: "Coba lagi", exact: true }).click()
-  await expect(metric(page, "Alokasi kejadian pada periode")).toHaveText(
+  await expect(metric(page, "Total denda periode ini")).toHaveText(
     /Rp\s?20\.000/
   )
   await expect(
-    page.getByRole("heading", { name: "Draft perlu ditinjau (1)" })
+    page.getByRole("heading", { name: "Draft belum selesai (1)" })
   ).toBeVisible()
   await expect(
     page.getByText("Draft reporting DASH", { exact: true })
   ).toBeVisible()
   await page.getByRole("button", { name: "Segarkan ringkasan" }).click()
-  await expect(metric(page, "Sisa seluruh kejadian saat ini")).toHaveText(
-    /Rp\s?19\.000/
-  )
+  await expect(metric(page, "Sisa denda saat ini")).toHaveText(/Rp\s?19\.000/)
   await period(page, "2024-01-01", "2024-01-31")
-  await expect(metric(page, "Kejadian diposting pada periode")).toHaveText("0")
-  await expect(metric(page, "Sisa seluruh kejadian saat ini")).toHaveText(
-    /Rp\s?19\.000/
-  )
+  await expect(metric(page, "Denda periode ini")).toHaveText("0")
+  await expect(metric(page, "Sisa denda saat ini")).toHaveText(/Rp\s?19\.000/)
+  await openPanel(page, "Grafik penyelesaian")
   await expect(
     page.getByRole("heading", { name: "Sisa terbesar saat ini" })
   ).toBeVisible()
   for (const width of [320, 360, 768, 1440]) {
     await page.setViewportSize({ width, height: 1000 })
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+    )
     await noOverflow(page)
   }
   expect(await contrastFailures(page)).toEqual([])
@@ -308,16 +320,18 @@ test("dashboard retries, honest cross-period labels, draft review and responsive
   await page.evaluate(() => localStorage.setItem("theme", "dark"))
   await page.reload()
   await expect(page.locator("html")).toHaveClass(/dark/)
-  await expect(metric(page, "Sisa seluruh kejadian saat ini")).toHaveText(
-    /Rp\s?19\.000/
-  )
+  await expect(metric(page, "Sisa denda saat ini")).toHaveText(/Rp\s?19\.000/)
   await page.setViewportSize({ width: 360, height: 900 })
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  )
   await noOverflow(page)
   expect(await contrastFailures(page)).toEqual([])
   await page.screenshot({
     path: "/tmp/catat-denda-phase5-dashboard-dark-mobile.png",
     fullPage: true,
   })
+  await openPanel(page, "Periode dan filter")
   await page
     .getByRole("button", { name: "Bulan berjalan", exact: true })
     .click()
@@ -329,12 +343,15 @@ test("audit actor/action/entity filters, payload details, paging and empty state
   const me = (await (await page.request.get("/api/v1/auth/me")).json()).data
   await page.goto("/audit-logs")
   await expect(
-    page.getByRole("heading", { name: "Audit log", exact: true })
+    page.getByRole("heading", { name: "Riwayat aktivitas", exact: true })
   ).toBeVisible()
+  await revealControl(page, "Aktor")
   await page.getByLabel("Aktor", { exact: true }).selectOption(me.id)
+  await revealControl(page, "Aksi")
   await page
     .getByLabel("Aksi", { exact: true })
     .selectOption("EXPORT_FINE_CASES")
+  await revealControl(page, "Entitas")
   await page.getByLabel("Entitas", { exact: true }).selectOption("ReportExport")
   await page.getByRole("button", { name: "Terapkan filter audit" }).click()
   await expect(page.locator("article").first()).toBeVisible()
@@ -351,12 +368,16 @@ test("audit actor/action/entity filters, payload details, paging and empty state
   expect(await page.locator("main").innerText()).not.toContain("quoted")
   await page.reload()
   await expect(page.getByLabel("Aktor", { exact: true })).toHaveValue(me.id)
+  await revealControl(page, "Dari waktu pencatatan (WIB)")
   await page.getByLabel("Dari waktu pencatatan (WIB)").fill("2020-01-01")
+  await revealControl(page, "Sampai waktu pencatatan (WIB)")
   await page.getByLabel("Sampai waktu pencatatan (WIB)").fill("2020-01-31")
   await page.getByRole("button", { name: "Terapkan filter audit" }).click()
   await expect(
     page.getByText("Tidak ada audit yang sesuai.", { exact: true })
   ).toBeVisible()
+  await openPanel(page, "Filter aktivitas")
+  await openPanel(page, "Filter aktivitas")
   await page.getByRole("button", { name: "Reset filter audit" }).click()
   await expect(page.locator("article")).toHaveCount(20)
   await page.getByRole("button", { name: "Berikutnya", exact: true }).click()
@@ -385,12 +406,15 @@ test("business settings version conflict retains edits and updates brand and rep
   await page.goto("/settings")
   const other = await context.newPage()
   await other.goto("/settings")
+  await revealControl(page, "Nama usaha")
   await page.getByLabel("Nama usaha", { exact: true }).fill("X")
   await page.getByRole("button", { name: "Simpan pengaturan usaha" }).click()
   await expect(
     page.getByRole("alert").filter({ hasText: "minimal 2" })
   ).toBeVisible()
+  await revealControl(page, "Nama usaha")
   await page.getByLabel("Nama usaha", { exact: true }).fill("Usaha Pagi QA")
+  await revealControl(page, "Referensi kebijakan denda (opsional)")
   await page
     .getByLabel("Referensi kebijakan denda (opsional)")
     .fill("Kebijakan internal QA")
@@ -416,12 +440,16 @@ test("business settings version conflict retains edits and updates brand and rep
     "Usaha Pagi QA"
   )
   const longName = "Usaha " + "X".repeat(144)
+  await revealControl(page, "Nama usaha")
   await page.getByLabel("Nama usaha", { exact: true }).fill(longName)
   await page.getByRole("button", { name: "Simpan pengaturan usaha" }).click()
   await expect(
     page.getByRole("link", { name: longName, exact: true })
   ).toBeVisible()
   await page.setViewportSize({ width: 320, height: 900 })
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+  )
   await noOverflow(page)
   await page.screenshot({
     path: "/tmp/catat-denda-phase5-settings-mobile.png",
@@ -434,7 +462,7 @@ test("business settings version conflict retains edits and updates brand and rep
   await expect(page.getByText(longName, { exact: true }).last()).toBeVisible()
   await noOverflow(page)
   await page.getByRole("button", { name: "Segarkan laporan" }).click()
-  await expect(metric(page, "Kejadian diposting pada periode")).toBeVisible()
+  await expect(metric(page, "Denda periode ini")).toBeVisible()
   const saved = (await (await page.request.get("/api/v1/settings")).json()).data
   expect(
     (
